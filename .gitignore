@@ -1,0 +1,7 @@
+.DS_Store
+run.sh
+build
+*.o
+*.nvf
+*.out
+*.n64

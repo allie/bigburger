@@ -6,10 +6,6 @@
 #include "camera.h"
 #include "object.h"
 
-#define ROT_VELOCITY 1.0f
-#define CAMERA_MOVE_SCALE 0.25
-#define NUM_LEVELS 1
-
 extern NUContData controller[1];
 
 static bool paused = TRUE;

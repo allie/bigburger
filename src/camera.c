@@ -4,8 +4,6 @@
 #include "camera.h"
 #include "graphics.h"
 
-#define PERSPECTIVE 0.6f
-
 // Global camera
 Camera camera;
 
@@ -40,14 +38,10 @@ static void recalc_orientation() {
 
 void camera_init() {
   // Initialize field of view
-  // camera.fov = 60.0f + (PERSPECTIVE * 60.0f);
   camera.fov = 90;
-  // camera.fov = 120;
 
   // Initialize camera position
-  // vec3f_set(camera.pos, 0, 0, 1300 + (1.0f - PERSPECTIVE) * 650.0f);
   vec3f_set(camera.pos, 0, 0, 1450);
-  // vec3f_set(camera.pos, 0, 0, 1350);
 
   // Initialize world_up vector
   vec3f_set(camera.world_up, 0, 1, 0);

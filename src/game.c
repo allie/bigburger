@@ -7,6 +7,7 @@
 #include "easing.h"
 #include "object.h"
 #include "part.h"
+#include "colour.h"
 
 #include "models/bun.h"
 #include "models/patty.h"
@@ -35,6 +36,9 @@ static u32 current_y = 0;
 static bool bun_placed = FALSE;
 
 static EasingF camera_y;
+
+static Hsv bg_hsv;
+static Rgb bg_rgb;
 
 // Generate the next random burger part.
 // Doesn't allow the next part to be a dupe of any of the parts in the queue.
@@ -68,7 +72,7 @@ static Part get_next_part() {
       part.mass = 0.5f;
       break;
     case LETTUCE:
-      part.height = 40;
+      part.height = 44;
       part.size = 400;
       part.mass = 0.25f;
       break;
@@ -115,6 +119,8 @@ static void place_current_part() {
   parts[part_count++] = current_part;
   update_part_queue();
   current_part.obj.pos.y = current_y;
+  bg_hsv.h--;
+  bg_rgb = hsv_to_rgb(bg_hsv);
 }
 
 static void place_bun() {
@@ -131,6 +137,12 @@ void game_init(void) {
   current_y = 0;
   bun_placed = FALSE;
 
+  // Reset the bg colour
+  bg_hsv.h = 194;
+  bg_hsv.s = 255;
+  bg_hsv.v = 180;
+  bg_rgb = hsv_to_rgb(bg_hsv);
+
   // Initialize camera
   camera_init();
   camera_y.val = CAMERA_BASE_Y;
@@ -145,6 +157,9 @@ void game_init(void) {
   for (i = 0; i < PART_QUEUE_LENGTH; i++) {
     part_queue[i] = get_next_part();
   }
+
+  // Set up the current part
+  update_part_queue();
 
   // Initialize objects
   vec3f_set(bottom_bun.pos, 0, 0, 0);
@@ -161,10 +176,11 @@ void game_init(void) {
 void game_update(double dt) {
   // Check for a pause button press
   if (controller[0].trigger & START_BUTTON) {
-    paused = !paused;
+    // paused = !paused;
+    game_init();
   }
 
-  if (paused || bun_placed) {
+  if (bun_placed) {
     return;
   }
 
@@ -183,17 +199,20 @@ void game_update(double dt) {
 
 void game_draw(void) {
   int i;
+
   MVP* mvpp = &mvp[task_num];
   glistp = &glist[task_num][0];
 
   graphics_init_RCP();
-  graphics_clear(0, 0, 0);
+  graphics_clear(bg_rgb.r, bg_rgb.g, bg_rgb.b);
 
   camera_look(mvpp);
 
   // Draw things
-  // Bottom bun
-  graphics_draw_object(&bottom_bun, bun_Cube_mesh, FALSE);
+  // Bottom bun - only draw if there aren't many parts on the stack
+  if (part_count < 20) {
+    graphics_draw_object(&bottom_bun, bun_Cube_mesh, FALSE);
+  }
 
   for (i = 0; i < part_count; i++) {
     switch (parts[i].ingredient) {

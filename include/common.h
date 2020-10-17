@@ -12,6 +12,7 @@
 
 #define radians(d) ((d) * M_PI / 180.0)
 #define degrees(r) ((r) * 180.0 / M_PI)
+#define max(a, b) (a > b ? a : b)
 
 #define flatten3D(x, y, z, width, height) (((z) * (width) * (height)) + ((y) * (width)) + (x))
 

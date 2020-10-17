@@ -15,6 +15,8 @@
 
 #define flatten3D(x, y, z, width, height) (((z) * (width) * (height)) + ((y) * (width)) + (x))
 
+#define frand(max) ((float)rand() / (float)0x7fff) * (max)
+
 // Cube sides
 enum {
   SIDE_LEFT = 0,

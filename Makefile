@@ -1,3 +1,5 @@
+include $(ROOT)/usr/include/make/PRdefs
+
 N64KITDIR = C:/nintendo/n64kit
 
 SRCDIR = src
@@ -5,7 +7,7 @@ INCDIR = include
 OBJDIR = build
 DATADIR = data
 
-TARGET = brick64
+TARGET = burger
 
 CODEFILES = $(wildcard $(SRCDIR)/*.c) 
 CODEOBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(CODEFILES:.c=.o)) $(NUOBJ)
@@ -26,8 +28,6 @@ LCDEFS = -DF3DEX_GBI_2
 LCINCS = -I$(INC)/PR -I$(NUSYSINC) -I$(NUSTDINC) -I$(INCDIR) -I$(DATADIR)
 LCOPTS = -G 0 $(DEBUGSYM)
 LDFLAGS = -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) -L$(NUSTDLIB) -lnusys_d -lnustd_d -lgultra_d -L$(GCCDIR)/mipse/lib -lkmc
-
-include $(ROOT)/usr/include/make/PRdefs
 
 CODESEGMENT = $(OBJDIR)/codesegment.o
 SYMBOL = $(OBJDIR)/$(TARGET).out

@@ -38,16 +38,16 @@ static void recalc_orientation() {
 
 void camera_init() {
   // Initialize field of view
-  camera.fov = 90;
+  camera.fov = 50;
 
   // Initialize camera position
-  vec3f_set(camera.pos, 0, 0, 1450);
+  vec3f_set(camera.pos, 0, 300, 600);
 
   // Initialize world_up vector
   vec3f_set(camera.world_up, 0, 1, 0);
 
   // Initialize camera rotation
-  camera.pitch = 0;
+  camera.pitch = -30;
   camera.yaw = -90;
 
   recalc_orientation();

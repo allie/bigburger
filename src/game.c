@@ -24,7 +24,7 @@
 #define SPATULA_BASE_Y 80
 #define SPATULA_BASE_X 350
 #define SPATULA_ROT_X_MAX 90
-#define SPATULA_ANIM_DURATION 0.075
+#define SPATULA_ANIM_DURATION 0.4
 
 #define MIN_X -400
 #define MAX_X 400
@@ -49,10 +49,7 @@ static u32 current_y = 0;
 static bool bun_placed = FALSE;
 
 static EasingF camera_y;
-static struct {
-  EasingF down;
-  EasingF up;
-} spatula_anim;
+static EasingF spatula_anim;
 
 static Hsv bg_hsv;
 static Rgb bg_rgb;
@@ -150,8 +147,8 @@ static void place_current_part() {
 
   // Start spatula animation
   spatula.pos.x = current_part.obj.pos.x + SPATULA_BASE_X;
-  easing_init(spatula_anim.down, &spatula.rot.x, SPATULA_ANIM_DURATION, SPATULA_ROT_X_MAX, 0, easing_linear_f);
-  easing_play(spatula_anim.down);
+  easing_init(spatula_anim, &spatula.rot.x, SPATULA_ANIM_DURATION, 0, SPATULA_ROT_X_MAX, easing_linear_f);
+  easing_play(spatula_anim);
 
   // Update random part queue
   parts[part_count++] = current_part;
@@ -159,9 +156,6 @@ static void place_current_part() {
 
   // Move current_part to the correct elevation
   current_part.obj.pos.y = current_y;
-
-  // Hide current_part until the spatula slaps it
-  current_part.obj.scale = 0;
 
   // Set the speed and position of the new current_part
   randomize_current_part();
@@ -264,23 +258,8 @@ void game_update(double dt) {
     easing_update(camera_y, dt);
   }
 
-  if (spatula_anim.up.playing) {
-    easing_update(spatula_anim.up, dt);
-
-    // If the spatula finished ascending, show the current_part
-    if (!spatula_anim.up.playing) {
-      current_part.obj.scale = 1;
-    }
-  }
-
-  if (spatula_anim.down.playing) {
-    easing_update(spatula_anim.down, dt);
-
-    // If the spatula finished descending, send it back up
-    if (!spatula_anim.down.playing) {
-      easing_init(spatula_anim.up, &spatula.rot.x, SPATULA_ANIM_DURATION * 3, 0, SPATULA_ROT_X_MAX, easing_linear_f);
-      easing_play(spatula_anim.up);
-    }
+  if (spatula_anim.playing) {
+    easing_update(spatula_anim, dt);
   }
 
   update_current_part(dt);
@@ -355,7 +334,9 @@ void game_draw(void) {
     graphics_draw_object(&top_bun, bun_Cube_mesh, FALSE);
   }
 
-  graphics_draw_object(&spatula, spatula_Plane_mesh, FALSE);
+  if (spatula_anim.playing) {
+    graphics_draw_object(&spatula, spatula_Plane_mesh, FALSE);
+  }
 
   gDPFullSync(glistp++);
   gSPEndDisplayList(glistp++);

@@ -15,10 +15,14 @@
 #include "models/lettuce.h"
 #include "models/tomato.h"
 #include "models/onion.h"
+#include "models/spatula.h"
 
 #define CAMERA_BASE_Y 300
 #define MAX_PARTS 500
 #define PART_QUEUE_LENGTH 3
+
+#define SPATULA_BASE_Y 80
+#define SPATULA_ROT_X_MAX 40
 
 extern NUContData controller[1];
 
@@ -26,6 +30,7 @@ static bool paused = FALSE;
 
 static Object bottom_bun;
 static Object top_bun;
+static Object spatula;
 
 static Part current_part;
 static Part parts[MAX_PARTS];
@@ -36,6 +41,7 @@ static u32 current_y = 0;
 static bool bun_placed = FALSE;
 
 static EasingF camera_y;
+static EasingF spatula_anim;
 
 static Hsv bg_hsv;
 static Rgb bg_rgb;
@@ -113,12 +119,28 @@ static void update_part_queue() {
 }
 
 static void place_current_part() {
+  // Update current_y
   current_y += current_part.height;
+
+  // Start easing camera elevation up
   easing_init(camera_y, &camera.pos.y, 0.2, camera.pos.y, CAMERA_BASE_Y + current_y, easing_linear_f);
   easing_play(camera_y);
+
+  // Start spatula animation
+  easing_init(spatula_anim, &spatula.rot.x, 0.1, SPATULA_ROT_X_MAX, 0, easing_linear_f);
+  easing_play(spatula_anim);
+
+  // Update random part queue
   parts[part_count++] = current_part;
   update_part_queue();
+
+  // Move current_part to the correct elevation
   current_part.obj.pos.y = current_y;
+
+  // Move up the spatula
+  spatula.pos.y = current_y + SPATULA_BASE_Y;
+
+  // Update the background colour
   bg_hsv.h--;
   bg_rgb = hsv_to_rgb(bg_hsv);
 }
@@ -145,7 +167,6 @@ void game_init(void) {
 
   // Initialize camera
   camera_init();
-  camera_y.val = CAMERA_BASE_Y;
   camera.pos.y = CAMERA_BASE_Y;
 
   // Clear out random part queue
@@ -171,6 +192,11 @@ void game_init(void) {
   vec3f_set(top_bun.rot, 180, rand() % 360, 0);
   vec3f_set(top_bun.vel, 0, 0, 0);
   top_bun.scale = 1;
+
+  vec3f_set(spatula.pos, 350, SPATULA_BASE_Y, 650);
+  vec3f_set(spatula.rot, SPATULA_ROT_X_MAX, 30, 0);
+  vec3f_set(spatula.vel, 0, 0, 0);
+  spatula.scale = 0.5;
 }
 
 void game_update(double dt) {
@@ -194,6 +220,10 @@ void game_update(double dt) {
 
   if (camera_y.playing) {
     easing_update(camera_y, dt);
+  }
+
+  if (spatula_anim.playing) {
+    easing_update(spatula_anim, dt);
   }
 }
 
@@ -242,6 +272,8 @@ void game_draw(void) {
   if (bun_placed) {
     graphics_draw_object(&top_bun, bun_Cube_mesh, FALSE);
   }
+
+  graphics_draw_object(&spatula, spatula_Plane_mesh, FALSE);
 
   gDPFullSync(glistp++);
   gSPEndDisplayList(glistp++);

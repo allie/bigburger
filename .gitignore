@@ -5,3 +5,4 @@ build
 *.nvf
 *.out
 *.n64
+*.sh

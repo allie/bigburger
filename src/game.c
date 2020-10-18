@@ -22,7 +22,15 @@
 #define PART_QUEUE_LENGTH 3
 
 #define SPATULA_BASE_Y 80
-#define SPATULA_ROT_X_MAX 40
+#define SPATULA_BASE_X 350
+#define SPATULA_ROT_X_MAX 90
+#define SPATULA_ANIM_DURATION 0.075
+
+#define MIN_X -400
+#define MAX_X 400
+
+#define PART_BASE_SPEED 800
+#define PART_SPEED_VARIANCE 2000
 
 extern NUContData controller[1];
 
@@ -41,7 +49,10 @@ static u32 current_y = 0;
 static bool bun_placed = FALSE;
 
 static EasingF camera_y;
-static EasingF spatula_anim;
+static struct {
+  EasingF down;
+  EasingF up;
+} spatula_anim;
 
 static Hsv bg_hsv;
 static Rgb bg_rgb;
@@ -118,17 +129,29 @@ static void update_part_queue() {
   part_queue[0] = get_next_part();
 }
 
+static void randomize_current_part() {
+  current_part.obj.pos.x = (rand() % (MAX_X * 2)) - MAX_X;
+  current_part.obj.vel.x = (rand() % PART_SPEED_VARIANCE) + PART_BASE_SPEED;
+  if (current_part.obj.pos.x > 0) {
+    current_part.obj.vel.x *= -1;
+  }
+}
+
 static void place_current_part() {
   // Update current_y
   current_y += current_part.height;
+
+  // Stop current_part from moving
+  current_part.obj.vel.x = 0;
 
   // Start easing camera elevation up
   easing_init(camera_y, &camera.pos.y, 0.2, camera.pos.y, CAMERA_BASE_Y + current_y, easing_linear_f);
   easing_play(camera_y);
 
   // Start spatula animation
-  easing_init(spatula_anim, &spatula.rot.x, 0.1, SPATULA_ROT_X_MAX, 0, easing_linear_f);
-  easing_play(spatula_anim);
+  spatula.pos.x = current_part.obj.pos.x + SPATULA_BASE_X;
+  easing_init(spatula_anim.down, &spatula.rot.x, SPATULA_ANIM_DURATION, SPATULA_ROT_X_MAX, 0, easing_linear_f);
+  easing_play(spatula_anim.down);
 
   // Update random part queue
   parts[part_count++] = current_part;
@@ -136,6 +159,12 @@ static void place_current_part() {
 
   // Move current_part to the correct elevation
   current_part.obj.pos.y = current_y;
+
+  // Hide current_part until the spatula slaps it
+  current_part.obj.scale = 0;
+
+  // Set the speed and position of the new current_part
+  randomize_current_part();
 
   // Move up the spatula
   spatula.pos.y = current_y + SPATULA_BASE_Y;
@@ -149,6 +178,18 @@ static void place_bun() {
   current_y += current_part.height;
   top_bun.pos.y = current_y;
   bun_placed = TRUE;
+}
+
+static void update_current_part(double dt) {
+  current_part.obj.pos.x += current_part.obj.vel.x * dt;
+  if (current_part.obj.pos.x >= MAX_X) {
+    current_part.obj.pos.x = MAX_X;
+    current_part.obj.vel.x *= -1;
+  }
+  if (current_part.obj.pos.x <= MIN_X) {
+    current_part.obj.pos.x = MIN_X;
+    current_part.obj.vel.x *= -1;
+  }
 }
 
 void game_init(void) {
@@ -181,6 +222,7 @@ void game_init(void) {
 
   // Set up the current part
   update_part_queue();
+  randomize_current_part();
 
   // Initialize objects
   vec3f_set(bottom_bun.pos, 0, 0, 0);
@@ -193,7 +235,7 @@ void game_init(void) {
   vec3f_set(top_bun.vel, 0, 0, 0);
   top_bun.scale = 1;
 
-  vec3f_set(spatula.pos, 350, SPATULA_BASE_Y, 650);
+  vec3f_set(spatula.pos, SPATULA_BASE_X + current_part.x, SPATULA_BASE_Y, 650);
   vec3f_set(spatula.rot, SPATULA_ROT_X_MAX, 30, 0);
   vec3f_set(spatula.vel, 0, 0, 0);
   spatula.scale = 0.5;
@@ -222,9 +264,26 @@ void game_update(double dt) {
     easing_update(camera_y, dt);
   }
 
-  if (spatula_anim.playing) {
-    easing_update(spatula_anim, dt);
+  if (spatula_anim.up.playing) {
+    easing_update(spatula_anim.up, dt);
+
+    // If the spatula finished ascending, show the current_part
+    if (!spatula_anim.up.playing) {
+      current_part.obj.scale = 1;
+    }
   }
+
+  if (spatula_anim.down.playing) {
+    easing_update(spatula_anim.down, dt);
+
+    // If the spatula finished descending, send it back up
+    if (!spatula_anim.down.playing) {
+      easing_init(spatula_anim.up, &spatula.rot.x, SPATULA_ANIM_DURATION * 3, 0, SPATULA_ROT_X_MAX, easing_linear_f);
+      easing_play(spatula_anim.up);
+    }
+  }
+
+  update_current_part(dt);
 }
 
 void game_draw(void) {
@@ -266,6 +325,29 @@ void game_draw(void) {
         graphics_draw_object(&parts[i].obj, tomato_Cube_mesh, FALSE);
         break;
     }
+  }
+
+  // Current part
+  switch (current_part.ingredient) {
+    case MEAT:
+      graphics_draw_object(&current_part.obj, patty_Cube_mesh, FALSE);
+      break;
+
+    case CHEESE:
+      graphics_draw_object(&current_part.obj, cheese_Cube_mesh, FALSE);
+      break;
+
+    case LETTUCE:
+      graphics_draw_object(&current_part.obj, lettuce_Cube_mesh, FALSE);
+      break;
+
+    case ONION:
+      graphics_draw_object(&current_part.obj, onion_Cube_mesh, FALSE);
+      break;
+
+    case TOMATO:
+      graphics_draw_object(&current_part.obj, tomato_Cube_mesh, FALSE);
+      break;
   }
 
   // Top bun

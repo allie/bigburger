@@ -30,7 +30,7 @@
 #define MAX_X 400
 
 #define PART_BASE_SPEED 800
-#define PART_SPEED_VARIANCE 2000
+#define PART_SPEED_VARIANCE 1000
 
 extern NUContData controller[1];
 
@@ -127,7 +127,11 @@ static void update_part_queue() {
 }
 
 static void randomize_current_part() {
-  current_part.obj.pos.x = (rand() % (MAX_X * 2)) - MAX_X;
+  current_part.obj.pos.x = (rand() % (MAX_X - (current_part.size / 2))) + (current_part.size);
+  if (rand() % 2 == 0) {
+    current_part.obj.pos.x *= -1;
+  }
+
   current_part.obj.vel.x = (rand() % PART_SPEED_VARIANCE) + PART_BASE_SPEED;
   if (current_part.obj.pos.x > 0) {
     current_part.obj.vel.x *= -1;
@@ -265,6 +269,30 @@ void game_update(double dt) {
   update_current_part(dt);
 }
 
+static void draw_part(Part* part) {
+  switch (part->ingredient) {
+    case MEAT:
+      graphics_draw_object(&(part->obj), patty_Cube_mesh, FALSE);
+      break;
+
+    case CHEESE:
+      graphics_draw_object(&(part->obj), cheese_Cube_mesh, FALSE);
+      break;
+
+    case LETTUCE:
+      graphics_draw_object(&(part->obj), lettuce_Cube_mesh, FALSE);
+      break;
+
+    case ONION:
+      graphics_draw_object(&(part->obj), onion_Cube_mesh, FALSE);
+      break;
+
+    case TOMATO:
+      graphics_draw_object(&(part->obj), tomato_Cube_mesh, FALSE);
+      break;
+  }
+}
+
 void game_draw(void) {
   int i;
 
@@ -282,58 +310,26 @@ void game_draw(void) {
     graphics_draw_object(&bottom_bun, bun_Cube_mesh, FALSE);
   }
 
-  for (i = 0; i < part_count; i++) {
-    switch (parts[i].ingredient) {
-      case MEAT:
-        graphics_draw_object(&parts[i].obj, patty_Cube_mesh, FALSE);
-        break;
-
-      case CHEESE:
-        graphics_draw_object(&parts[i].obj, cheese_Cube_mesh, FALSE);
-        break;
-
-      case LETTUCE:
-        graphics_draw_object(&parts[i].obj, lettuce_Cube_mesh, FALSE);
-        break;
-
-      case ONION:
-        graphics_draw_object(&parts[i].obj, onion_Cube_mesh, FALSE);
-        break;
-
-      case TOMATO:
-        graphics_draw_object(&parts[i].obj, tomato_Cube_mesh, FALSE);
-        break;
+  // Placed parts
+  if (part_count < 20) {
+    for (i = 0; i < part_count; i++) {
+      draw_part(&parts[i]);
+    }
+  } else {
+    for (i = part_count - 20; i < part_count; i++) {
+      draw_part(&parts[i]);
     }
   }
 
   // Current part
-  switch (current_part.ingredient) {
-    case MEAT:
-      graphics_draw_object(&current_part.obj, patty_Cube_mesh, FALSE);
-      break;
+  draw_part(&current_part);
 
-    case CHEESE:
-      graphics_draw_object(&current_part.obj, cheese_Cube_mesh, FALSE);
-      break;
-
-    case LETTUCE:
-      graphics_draw_object(&current_part.obj, lettuce_Cube_mesh, FALSE);
-      break;
-
-    case ONION:
-      graphics_draw_object(&current_part.obj, onion_Cube_mesh, FALSE);
-      break;
-
-    case TOMATO:
-      graphics_draw_object(&current_part.obj, tomato_Cube_mesh, FALSE);
-      break;
-  }
-
-  // Top bun
+  // Top bun, if placed
   if (bun_placed) {
     graphics_draw_object(&top_bun, bun_Cube_mesh, FALSE);
   }
 
+  // Spatula
   if (spatula_anim.playing) {
     graphics_draw_object(&spatula, spatula_Plane_mesh, FALSE);
   }

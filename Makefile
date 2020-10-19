@@ -26,7 +26,7 @@ NUOBJ = $(NUSYSLIB)/nusys.o
 
 LCDEFS = -DF3DEX_GBI_2
 LCINCS = -I$(INC)/PR -I$(NUSYSINC) -I$(NUSTDINC) -I$(INCDIR) -I$(DATADIR)
-LCOPTS = -G 0 $(DEBUGSYM)
+LCOPTS = -G 0 $(DEBUGSYM) -D__DEBUG__
 LDFLAGS = -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) -L$(NUSTDLIB) -lnusys_d -lnustd_d -lgultra_d -L$(GCCDIR)/mipse/lib -lkmc
 
 CODESEGMENT = $(OBJDIR)/codesegment.o

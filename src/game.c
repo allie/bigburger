@@ -35,6 +35,7 @@
 extern NUContData controller[1];
 
 static bool paused = FALSE;
+static bool show_debug_console = FALSE;
 
 static Object bottom_bun;
 static Object top_bun;
@@ -240,6 +241,12 @@ void game_init(void) {
 }
 
 void game_update(double dt) {
+#ifdef __DEBUG__
+  if (controller[0].trigger & Z_TRIG) {
+    show_debug_console = !show_debug_console;
+  }
+#endif
+
   // Check for a pause button press
   if (controller[0].trigger & START_BUTTON) {
     // paused = !paused;
@@ -343,6 +350,18 @@ void game_draw(void) {
     NU_GFX_UCODE_F3DEX,
     NU_SC_SWAPBUFFER
   );
+
+#ifdef __DEBUG__
+  if (show_debug_console) {
+    nuDebConClear(0);
+    nuDebConWindowSize(0, 5, 5);
+    nuDebConTextPos(0, 0, 0);
+    nuDebConTextColor(0, NU_DEB_CON_TEXT_WHITE);
+    // Write some text
+    // nuDebConCPuts(0, "");
+    nuDebConDispEX2(NU_SC_NOSWAPBUFFER);
+  }
+#endif
 
   task_num++;
   task_num %= MAX_TASKS;

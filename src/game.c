@@ -8,6 +8,7 @@
 #include "object.h"
 #include "part.h"
 #include "colour.h"
+#include "img.h"
 
 #include "models/bun.h"
 #include "models/patty.h"

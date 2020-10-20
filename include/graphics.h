@@ -27,6 +27,9 @@ void graphics_clear(u8 r, u8 g, u8 b);
 void graphics_start_object(Object* object, bool xlu);
 void graphics_start_textured_object(Object* object, bool xlu);
 void graphics_end_object();
+void graphics_draw_texrect(unsigned short* tex, u32 x, u32 y, u32 w, u32 h);
+void graphics_start_texrect();
+void graphics_end_texrect();
 
 #define graphics_draw_object(obj, dl, xlu) { \
   graphics_start_object((obj), (xlu)); \

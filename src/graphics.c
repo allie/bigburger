@@ -97,3 +97,47 @@ void graphics_end_object() {
   gDPPipeSync(glistp++);
   gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
 }
+
+// Draw a single texture on the screen
+void graphics_draw_texrect(unsigned short* tex, u32 x, u32 y, u32 w, u32 h) {
+  gDPSetCycleType(glistp++, G_CYC_1CYCLE);
+  gDPSetCombineMode(glistp++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPSetRenderMode(glistp++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE);
+  gDPSetDepthSource(glistp++, G_ZS_PRIM);
+  gDPSetPrimDepth(glistp++, 0, 0);
+  gDPSetTexturePersp(glistp++, G_TP_NONE);
+  gDPLoadTextureBlock(
+    glistp++,
+    tex,
+    G_IM_FMT_RGBA, G_IM_SIZ_16b,
+    w, h, 0,
+    G_TX_WRAP, G_TX_WRAP,
+    G_TX_NOMASK, G_TX_NOMASK,
+    G_TX_NOLOD, G_TX_NOLOD
+  );
+  gSPTextureRectangle(
+    glistp++,
+    x << 2, y << 2,
+    (x + w) << 2, (y + h) << 2,
+    G_TX_RENDERTILE,
+    0 << 5, 0 << 5,
+    1 << 10, 1 << 10
+  );
+  gDPPipeSync(glistp++);
+}
+
+// Sets up to draw a texture rect without actually doing anything
+// Useful for drawing multiple texture rectangles sequentially
+void graphics_start_texrect() {
+  gDPSetCycleType(glistp++, G_CYC_1CYCLE);
+  gDPSetCombineMode(glistp++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPSetRenderMode(glistp++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE);
+  gDPSetDepthSource(glistp++, G_ZS_PRIM);
+  gDPSetPrimDepth(glistp++, 0, 0);
+  gDPSetTexturePersp(glistp++, G_TP_NONE);
+}
+
+// End drawing a texture or multiple textures
+void graphics_end_texrect() {
+  gDPPipeSync(glistp++);
+}

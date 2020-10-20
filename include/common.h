@@ -16,16 +16,6 @@
 
 #define flatten3D(x, y, z, width, height) (((z) * (width) * (height)) + ((y) * (width)) + (x))
 
-// Cube sides
-enum {
-  SIDE_LEFT = 0,
-  SIDE_RIGHT = 1,
-  SIDE_TOP = 2,
-  SIDE_BOTTOM = 3,
-  SIDE_FRONT = 4,
-  SIDE_BACK = 5
-};
-
 typedef u32 bool;
 
 #endif

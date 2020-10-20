@@ -59,6 +59,7 @@ static u32 part_count = 0;
 static u32 current_y = 0;
 static f32 centre_of_mass = 0;
 static bool bun_placed = FALSE;
+static bool in_sweet_spot = FALSE;
 
 static EasingF camera_y;
 static EasingF spatula_anim;
@@ -214,33 +215,6 @@ static void place_current_part() {
   // Update random part queue
   parts[part_count++] = current_part;
 
-  // To judge the level, first determine whether the newly placed part sticks
-  // to the burger or falls off
-  // if (part_count > 1) {
-  //   // If there are two or more parts, compare to the part below the new part
-  //   if (fabs(parts[part_count - 1].obj.pos.x) > (parts[part_count - 2].obj.pos.x + (parts[part_count - 2].size / 2))) {
-  //     // TODO: Miss! This part should fall off the burger and a life should be removed
-  //     place_bun();
-  //     return;
-  //   }
-  // } else if (part_count == 1) {
-  //   // If there's only one part, compare to the bottom bun, which is at the origin
-  //   if (fabs(parts[part_count - 1].obj.pos.x) > 220) {
-  //     // TODO: Miss! This part should fall off the burger and a life should be removed
-  //     // Maybe poke fun at the player for missing on round 1, too :)
-  //     place_bun();
-  //     return;
-  //   }
-  // }
-
-  // Calculate the new centre of mass and judge the level
-  // centre_of_mass = calc_centre_of_mass();
-
-  // if (fabs(centre_of_mass) > MAX_CENTRE_OF_MASS) {
-  //   place_bun();
-  //   return;
-  // }
-
   // Advance the part queue
   update_part_queue();
 
@@ -267,6 +241,22 @@ static void update_current_part(double dt) {
   if (current_part.obj.pos.x <= MIN_X) {
     current_part.obj.pos.x = MIN_X;
     current_part.obj.vel.x *= -1;
+  }
+
+  // Grow the piece for a brief moment when it passes the sweet spot
+  if (part_count > 0) {
+    if (fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) < 40) {
+      in_sweet_spot = TRUE;
+      current_part.obj.scale = 1.1;
+    }
+  } else {
+    if (fabs(current_part.obj.pos.x) < 40) {
+      in_sweet_spot = TRUE;
+      current_part.obj.scale = 1.1;
+    } else {
+      in_sweet_spot = FALSE;
+      current_part.obj.scale = 1;
+    }
   }
 }
 

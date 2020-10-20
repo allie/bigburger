@@ -1,10 +1,16 @@
 #include "img.h"
 #include "graphics.h"
 
+void img_start() {
+  graphics_start_texrect();
+}
+
+void img_end() {
+  graphics_end_texrect();
+}
+
 void img_draw(Img img, int x, int y) {
   int tx, ty, sx, sy, ti = 0;
-
-  graphics_start_texrect();
 
   for (ty = 0; ty < img.num_tiles_y; ty++) {
     for (tx = 0; tx < img.num_tiles_x; tx++) {
@@ -36,6 +42,4 @@ void img_draw(Img img, int x, int y) {
       ti++;
     }
   }
-
-  graphics_end_texrect();
 }

@@ -372,7 +372,9 @@ void game_draw(void) {
   }
 
   // Draw the HUD on top of everything else
+  img_start();
   draw_hud();
+  img_end();
 
   gDPFullSync(glistp++);
   gSPEndDisplayList(glistp++);

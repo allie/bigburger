@@ -22,6 +22,8 @@ typedef struct {
   Rgba16bTexture* tiles;
 } Img;
 
+void img_start();
+void img_end();
 // TODO: expand this with more options than just position
 void img_draw(Img img, int x, int y);
 

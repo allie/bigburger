@@ -37,8 +37,10 @@
 #define MIN_X -400
 #define MAX_X 400
 
-#define PART_BASE_SPEED 800
-#define PART_SPEED_VARIANCE 1000
+#define PART_BASE_SPEED 500
+#define LEVEL_SPEED_INCREASE 10
+
+#define MAX_CENTRE_OF_MASS 220
 
 extern NUContData controller[1];
 
@@ -55,6 +57,7 @@ static Part part_queue[PART_QUEUE_LENGTH];
 
 static u32 part_count = 0;
 static u32 current_y = 0;
+static f32 centre_of_mass = 0;
 static bool bun_placed = FALSE;
 
 static EasingF camera_y;
@@ -113,7 +116,7 @@ static Part get_next_part() {
       break;
     case CHEESE:
       part.height = 20;
-      part.size = 320;
+      part.size = 386;
       part.mass = 0.5f;
       break;
     case LETTUCE:
@@ -123,12 +126,12 @@ static Part get_next_part() {
       break;
     case ONION:
       part.height = 20;
-      part.size = 246;
+      part.size = 352;
       part.mass = 0.5f;
       break;
     case TOMATO:
       part.height = 20;
-      part.size = 246;
+      part.size = 352;
       part.mass = 0.5f;
       break;
     default:
@@ -157,16 +160,39 @@ static void update_part_queue() {
   part_queue[0] = get_next_part();
 }
 
-static void randomize_current_part() {
+static void init_current_part() {
   current_part.obj.pos.x = (rand() % (MAX_X - (current_part.size / 2))) + (current_part.size);
   if (rand() % 2 == 0) {
     current_part.obj.pos.x *= -1;
   }
 
-  current_part.obj.vel.x = (rand() % PART_SPEED_VARIANCE) + PART_BASE_SPEED;
+  current_part.obj.vel.x = PART_BASE_SPEED + part_count * LEVEL_SPEED_INCREASE;
   if (current_part.obj.pos.x > 0) {
     current_part.obj.vel.x *= -1;
   }
+}
+
+static f32 calc_centre_of_mass() {
+  f32 top;
+  f32 total_mass;
+  int i;
+
+  for (i = 0; i < part_count; i++) {
+    top += parts[i].mass * parts[i].obj.pos.x;
+    total_mass += parts[i].mass;
+  }
+
+  if (total_mass == 0) {
+    return 0;
+  }
+
+  return top / total_mass;
+}
+
+static void place_bun() {
+  current_y += current_part.height;
+  top_bun.pos.y = current_y;
+  bun_placed = TRUE;
 }
 
 static void place_current_part() {
@@ -187,13 +213,42 @@ static void place_current_part() {
 
   // Update random part queue
   parts[part_count++] = current_part;
+
+  // To judge the level, first determine whether the newly placed part sticks
+  // to the burger or falls off
+  // if (part_count > 1) {
+  //   // If there are two or more parts, compare to the part below the new part
+  //   if (fabs(parts[part_count - 1].obj.pos.x) > (parts[part_count - 2].obj.pos.x + (parts[part_count - 2].size / 2))) {
+  //     // TODO: Miss! This part should fall off the burger and a life should be removed
+  //     place_bun();
+  //     return;
+  //   }
+  // } else if (part_count == 1) {
+  //   // If there's only one part, compare to the bottom bun, which is at the origin
+  //   if (fabs(parts[part_count - 1].obj.pos.x) > 220) {
+  //     // TODO: Miss! This part should fall off the burger and a life should be removed
+  //     // Maybe poke fun at the player for missing on round 1, too :)
+  //     place_bun();
+  //     return;
+  //   }
+  // }
+
+  // Calculate the new centre of mass and judge the level
+  // centre_of_mass = calc_centre_of_mass();
+
+  // if (fabs(centre_of_mass) > MAX_CENTRE_OF_MASS) {
+  //   place_bun();
+  //   return;
+  // }
+
+  // Advance the part queue
   update_part_queue();
 
   // Move current_part to the correct elevation
   current_part.obj.pos.y = current_y;
 
   // Set the speed and position of the new current_part
-  randomize_current_part();
+  init_current_part();
 
   // Move up the spatula
   spatula.pos.y = current_y + SPATULA_BASE_Y;
@@ -201,12 +256,6 @@ static void place_current_part() {
   // Update the background colour
   bg_hsv.h--;
   bg_rgb = hsv_to_rgb(bg_hsv);
-}
-
-static void place_bun() {
-  current_y += current_part.height;
-  top_bun.pos.y = current_y;
-  bun_placed = TRUE;
 }
 
 static void update_current_part(double dt) {
@@ -227,7 +276,9 @@ void game_init(void) {
   // Reset some variables
   part_count = 0;
   current_y = 0;
+  centre_of_mass = 0;
   bun_placed = FALSE;
+  camera_y.playing = FALSE;
 
   // Reset the bg colour
   bg_hsv.h = 194;
@@ -251,7 +302,7 @@ void game_init(void) {
 
   // Set up the current part
   update_part_queue();
-  randomize_current_part();
+  init_current_part();
 
   // Initialize objects
   vec3f_set(bottom_bun.pos, 0, 0, 0);
@@ -359,7 +410,9 @@ void game_draw(void) {
   }
 
   // Current part
-  draw_part(&current_part);
+  if (!bun_placed) {
+    draw_part(&current_part);
+  }
 
   // Top bun, if placed
   if (bun_placed) {
@@ -367,7 +420,7 @@ void game_draw(void) {
   }
 
   // Spatula
-  if (spatula_anim.playing) {
+  if (spatula_anim.playing && !bun_placed) {
     graphics_draw_object(&spatula, spatula_Plane_mesh, FALSE);
   }
 

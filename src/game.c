@@ -18,7 +18,14 @@
 #include "models/onion.h"
 #include "models/spatula.h"
 
-#define CAMERA_BASE_Y 300
+#include "textures/balance_bg.h"
+#include "textures/balance_arrow.h"
+#include "textures/level.h"
+#include "textures/next_up.h"
+#include "textures/next_big.h"
+#include "textures/next_small.h"
+#include "textures/great.h"
+
 #define MAX_PARTS 500
 #define PART_QUEUE_LENGTH 3
 
@@ -55,6 +62,28 @@ static EasingF spatula_anim;
 
 static Hsv bg_hsv;
 static Rgb bg_rgb;
+
+// Draw the HUD
+static void draw_hud() {
+  // Balance meter background
+  img_draw(balance_bg_img, SCREEN_W / 2 - balance_bg_img.width / 2, 45);
+
+  // Balance meter arrow
+  img_draw(balance_arrow_img, SCREEN_W / 2 - balance_arrow_img.width / 2, 45 - 8);
+
+  // "LEVEL" text
+  img_draw(level_img, 27, 16);
+
+  // "NEXT UP" text
+  img_draw(next_up_img, 246, 16);
+
+  // Upcoming piece backgrounds
+  img_draw(next_big_img, 255, 34);
+  img_draw(next_small_img, 259, 74);
+
+  // Test drawing GREAT!
+  // img_draw(great_img, SCREEN_W / 2 - great_img.width / 2, 80);
+}
 
 // Generate the next random burger part.
 // Doesn't allow the next part to be a dupe of any of the parts in the queue.
@@ -341,6 +370,9 @@ void game_draw(void) {
   if (spatula_anim.playing) {
     graphics_draw_object(&spatula, spatula_Plane_mesh, FALSE);
   }
+
+  // Draw the HUD on top of everything else
+  draw_hud();
 
   gDPFullSync(glistp++);
   gSPEndDisplayList(glistp++);

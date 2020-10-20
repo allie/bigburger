@@ -41,7 +41,7 @@ void camera_init() {
   camera.fov = 50;
 
   // Initialize camera position
-  vec3f_set(camera.pos, 0, 300, 600);
+  vec3f_set(camera.pos, 0, 400, 600);
 
   // Initialize world_up vector
   vec3f_set(camera.world_up, 0, 1, 0);

@@ -9,6 +9,10 @@ void img_end() {
   graphics_end_texrect();
 }
 
+void img_set_colour(u8 r, u8 g, u8 b, u8 a) {
+  gDPSetPrimColor(glistp++, 0, 0, r, g, b, a);
+}
+
 void img_draw(Img img, float x, float y) {
   int tx, ty, sx, sy, ti = 0;
 

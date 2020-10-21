@@ -130,8 +130,8 @@ void graphics_draw_texrect(unsigned short* tex, u32 x, u32 y, u32 w, u32 h) {
 // Useful for drawing multiple texture rectangles sequentially
 void graphics_start_texrect() {
   gDPSetCycleType(glistp++, G_CYC_1CYCLE);
-  gDPSetCombineMode(glistp++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPSetRenderMode(glistp++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE);
+  gDPSetCombineMode(glistp++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+  gDPSetRenderMode(glistp++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
   gDPSetDepthSource(glistp++, G_ZS_PRIM);
   gDPSetPrimDepth(glistp++, 0, 0);
   gDPSetTexturePersp(glistp++, G_TP_NONE);

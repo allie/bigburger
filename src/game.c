@@ -73,10 +73,11 @@ static Rgb bg_rgb;
 // Draw the HUD
 static void draw_hud() {
   // Balance meter background
-  img_draw(balance_bg_img, SCREEN_W / 2 - balance_bg_img.width / 2, 45);
+  // img_draw(balance_bg_img, SCREEN_W / 2 - balance_bg_img.width / 2, 45);
 
   // Balance meter arrow
-  img_draw(balance_arrow_img, SCREEN_W / 2 - balance_arrow_img.width / 2, 45 - 8);
+  // img_draw(balance_arrow_img, SCREEN_W / 2 - balance_arrow_img.width / 2, 45 - 8);
+  img_set_colour(255, 255, 255, 255);
 
   // "LEVEL" text
   img_draw(level_img, 27, 16);
@@ -88,8 +89,8 @@ static void draw_hud() {
   img_draw(next_big_img, 255, 34);
   img_draw(next_small_img, 259, 74);
 
-  // Test drawing GREAT!
-  // img_draw(great_img, SCREEN_W / 2 - great_img.width / 2, 80);
+  // Draw popups
+  popup_draw();
 }
 
 // Generate the next random burger part.
@@ -268,18 +269,18 @@ static void update_current_part(double dt) {
   if (part_count > 0) {
     if (fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) < SWEET_SPOT_RANGE) {
       in_sweet_spot = TRUE;
-      current_part.obj.scale = 1.1;
+      // current_part.obj.scale = 1.1;
     } else {
       in_sweet_spot = FALSE;
-      current_part.obj.scale = 1;
+      // current_part.obj.scale = 1;
     }
   } else {
     if (fabs(current_part.obj.pos.x) < SWEET_SPOT_RANGE) {
       in_sweet_spot = TRUE;
-      current_part.obj.scale = 1.1;
+      // current_part.obj.scale = 1.1;
     } else {
       in_sweet_spot = FALSE;
-      current_part.obj.scale = 1;
+      // current_part.obj.scale = 1;
     }
   }
 }
@@ -447,7 +448,6 @@ void game_draw(void) {
   // Draw the HUD on top of everything else
   img_start();
   draw_hud();
-  popup_draw();
   img_end();
 
   gDPFullSync(glistp++);

@@ -6,6 +6,7 @@
 
 #define POPUP_DURATION 0.4
 #define POPUP_Y_ANIM_DURATION 0.1
+#define POPUP_FADE_ANIM_DURATION 0.1
 #define POPUP_START_Y 85
 #define POPUP_END_Y 80
 
@@ -20,8 +21,10 @@ typedef struct {
   int popup_type;
   double timer;
   float y;
+  int opacity;
   struct {
     EasingF y;
+    EasingI opacity;
   } anim;
 } Popup;
 

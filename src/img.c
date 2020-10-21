@@ -9,7 +9,7 @@ void img_end() {
   graphics_end_texrect();
 }
 
-void img_draw(Img img, int x, int y) {
+void img_draw(Img img, float x, float y) {
   int tx, ty, sx, sy, ti = 0;
 
   for (ty = 0; ty < img.num_tiles_y; ty++) {

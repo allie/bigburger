@@ -9,6 +9,7 @@
 #include "part.h"
 #include "colour.h"
 #include "img.h"
+#include "popup.h"
 
 #include "models/bun.h"
 #include "models/patty.h"
@@ -24,7 +25,6 @@
 #include "textures/next_up.h"
 #include "textures/next_big.h"
 #include "textures/next_small.h"
-#include "textures/great.h"
 
 #define MAX_PARTS 500
 #define PART_QUEUE_LENGTH 3
@@ -41,6 +41,9 @@
 #define LEVEL_SPEED_INCREASE 10
 
 #define MAX_CENTRE_OF_MASS 220
+
+#define SWEET_SPOT_RANGE 30
+#define BUN_RANGE 220
 
 extern NUContData controller[1];
 
@@ -197,6 +200,12 @@ static void place_bun() {
 }
 
 static void place_current_part() {
+  float dist = part_count > 0 ?
+    fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) :
+    fabs(current_part.obj.pos.x);
+
+  float max_safe_dist = part_count > 0 ? parts[part_count - 1].size / 2 : BUN_RANGE;
+
   // Update current_y
   current_y += current_part.height;
 
@@ -230,6 +239,17 @@ static void place_current_part() {
   // Update the background colour
   bg_hsv.h--;
   bg_rgb = hsv_to_rgb(bg_hsv);
+
+  // If this was a sweet spot hit, popup great
+  if (in_sweet_spot) {
+    popup_show(POPUP_GREAT);
+  } else {
+    if (dist >= max_safe_dist) {
+      popup_show(POPUP_MISS);
+    } else {
+      popup_show(POPUP_GOOD);
+    }
+  }
 }
 
 static void update_current_part(double dt) {
@@ -244,13 +264,17 @@ static void update_current_part(double dt) {
   }
 
   // Grow the piece for a brief moment when it passes the sweet spot
+  // This code is kind of a mess...
   if (part_count > 0) {
-    if (fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) < 40) {
+    if (fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) < SWEET_SPOT_RANGE) {
       in_sweet_spot = TRUE;
       current_part.obj.scale = 1.1;
+    } else {
+      in_sweet_spot = FALSE;
+      current_part.obj.scale = 1;
     }
   } else {
-    if (fabs(current_part.obj.pos.x) < 40) {
+    if (fabs(current_part.obj.pos.x) < SWEET_SPOT_RANGE) {
       in_sweet_spot = TRUE;
       current_part.obj.scale = 1.1;
     } else {
@@ -309,6 +333,9 @@ void game_init(void) {
   vec3f_set(spatula.rot, SPATULA_ROT_X_MAX, 30, 0);
   vec3f_set(spatula.vel, 0, 0, 0);
   spatula.scale = 0.5;
+
+  // Initialize popups
+  popup_init();
 }
 
 void game_update(double dt) {
@@ -345,6 +372,9 @@ void game_update(double dt) {
   }
 
   update_current_part(dt);
+
+  // Update the HUD
+  popup_update(dt);
 }
 
 static void draw_part(Part* part) {
@@ -417,6 +447,7 @@ void game_draw(void) {
   // Draw the HUD on top of everything else
   img_start();
   draw_hud();
+  popup_draw();
   img_end();
 
   gDPFullSync(glistp++);

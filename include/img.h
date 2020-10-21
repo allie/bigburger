@@ -25,6 +25,6 @@ typedef struct {
 void img_start();
 void img_end();
 // TODO: expand this with more options than just position
-void img_draw(Img img, int x, int y);
+void img_draw(Img img, float x, float y);
 
 #endif

@@ -49,6 +49,8 @@
 #define SCORE_GREAT 1000
 #define SCORE_GOOD 500
 
+#define SHRINK_ANIM_DURATION 0.05
+
 extern NUContData controller[1];
 
 static bool paused = FALSE;
@@ -71,6 +73,7 @@ static bool in_sweet_spot = FALSE;
 
 static EasingF camera_y;
 static EasingF spatula_anim;
+static EasingF shrink_anim;
 
 static Hsv bg_hsv;
 static Rgb bg_rgb;
@@ -186,7 +189,7 @@ static void update_part_queue() {
 }
 
 static void init_current_part() {
-  current_part.obj.pos.x = (rand() % (MAX_X - (current_part.size / 2))) + (current_part.size);
+  current_part.obj.pos.x = MAX_X;
   if (rand() % 2 == 0) {
     current_part.obj.pos.x *= -1;
   }
@@ -225,13 +228,16 @@ static void place_current_part() {
     fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) :
     fabs(current_part.obj.pos.x);
 
-  float max_safe_dist = part_count > 0 ? parts[part_count - 1].size / 2 : BUN_RANGE;
+  float max_safe_dist = part_count > 0 ? parts[part_count - 1].size / 2 * parts[part_count - 1].obj.scale : BUN_RANGE;
 
   // Update current_y
-  current_y += current_part.height;
+  current_y += current_part.height * current_part.obj.scale;
 
   // Stop current_part from moving
   current_part.obj.vel.x = 0;
+  // Reset the scale for the current part and stop the shrink animation
+  current_part.obj.scale = 1;
+  shrink_anim.playing = FALSE;
 
   // Start easing camera elevation up
   easing_init(camera_y, &camera.pos.y, 0.2, camera.pos.y, CAMERA_BASE_Y + current_y, easing_linear_f);
@@ -280,10 +286,14 @@ static void update_current_part(double dt) {
   if (current_part.obj.pos.x >= MAX_X) {
     current_part.obj.pos.x = MAX_X;
     current_part.obj.vel.x *= -1;
+    easing_init(shrink_anim, &current_part.obj.scale, SHRINK_ANIM_DURATION, current_part.obj.scale, current_part.obj.scale - 0.2, easing_linear_f);
+    easing_play(shrink_anim);
   }
   if (current_part.obj.pos.x <= MIN_X) {
     current_part.obj.pos.x = MIN_X;
     current_part.obj.vel.x *= -1;
+    easing_init(shrink_anim, &current_part.obj.scale, SHRINK_ANIM_DURATION, current_part.obj.scale, current_part.obj.scale - 0.2, easing_linear_f);
+    easing_play(shrink_anim);
   }
 
   // Grow the piece for a brief moment when it passes the sweet spot
@@ -291,18 +301,14 @@ static void update_current_part(double dt) {
   if (part_count > 0) {
     if (fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) < SWEET_SPOT_RANGE) {
       in_sweet_spot = TRUE;
-      // current_part.obj.scale = 1.1;
     } else {
       in_sweet_spot = FALSE;
-      // current_part.obj.scale = 1;
     }
   } else {
     if (fabs(current_part.obj.pos.x) < SWEET_SPOT_RANGE) {
       in_sweet_spot = TRUE;
-      // current_part.obj.scale = 1.1;
     } else {
       in_sweet_spot = FALSE;
-      // current_part.obj.scale = 1;
     }
   }
 }
@@ -393,6 +399,10 @@ void game_update(double dt) {
 
   if (spatula_anim.playing) {
     easing_update(spatula_anim, dt);
+  }
+
+  if (shrink_anim.playing) {
+    easing_update(shrink_anim, dt);
   }
 
   update_current_part(dt);

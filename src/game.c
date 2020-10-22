@@ -25,7 +25,7 @@
 #include "textures/next_big.h"
 #include "textures/next_small.h"
 
-#define MAX_PARTS 500
+#define MAX_PARTS 1001
 #define PART_QUEUE_LENGTH 3
 
 #define SPATULA_BASE_Y 80
@@ -235,9 +235,6 @@ static void place_current_part() {
 
   // Stop current_part from moving
   current_part.obj.vel.x = 0;
-  // Reset the scale for the current part and stop the shrink animation
-  current_part.obj.scale = 1;
-  shrink_anim.playing = FALSE;
 
   // Start easing camera elevation up
   easing_init(camera_y, &camera.pos.y, 0.2, camera.pos.y, CAMERA_BASE_Y + current_y, easing_linear_f);
@@ -259,6 +256,10 @@ static void place_current_part() {
 
   // Set the speed and position of the new current_part
   init_current_part();
+
+  // Reset the scale for the current part and stop the shrink animation
+  current_part.obj.scale = 1;
+  shrink_anim.playing = FALSE;
 
   // Move up the spatula
   spatula.pos.y = current_y + SPATULA_BASE_Y;

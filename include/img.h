@@ -5,26 +5,13 @@
 
 #define TMEM_SIZE 4096
 
-// Data for a part of an image
-typedef struct {
-  unsigned short data[TMEM_SIZE];
-} Rgba16bTexture;
-
-// A whole image that may contain 1 or multiple parts
-typedef struct {
-  u16 width;
-  u8 height;
-  u8 tile_width;
-  u8 tile_height;
-  u8 num_tiles_x;
-  u8 num_tiles_y;
-  u16 num_tiles;
-  Rgba16bTexture* tiles;
-} Img;
-
 void img_start();
 void img_end();
 // TODO: expand this with more options than just position
-void img_draw(Img img, float x, float y);
+// void img_draw(Img img, float x, float y);
+void _img_draw(void* img, float x, float y);
+
+// Helper macro to call img_draw more easily without casting to void*
+#define img_draw(img_data, x, y) _img_draw((void*)(&(img_data)), (x), (y))
 
 #endif

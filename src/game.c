@@ -19,8 +19,8 @@
 #include "models/onion.h"
 #include "models/spatula.h"
 
-#include "textures/balance_bg.h"
-#include "textures/balance_arrow.h"
+// #include "textures/balance_bg.h"
+// #include "textures/balance_arrow.h"
 #include "textures/level.h"
 #include "textures/next_up.h"
 #include "textures/next_big.h"
@@ -72,12 +72,16 @@ static Rgb bg_rgb;
 
 // Draw the HUD
 static void draw_hud() {
+  int x;
+
+  // Set the image colour to white with full alpha
+  img_set_colour(255, 255, 255, 255);
+
   // Balance meter background
   // img_draw(balance_bg_img, SCREEN_W / 2 - balance_bg_img.width / 2, 45);
 
   // Balance meter arrow
   // img_draw(balance_arrow_img, SCREEN_W / 2 - balance_arrow_img.width / 2, 45 - 8);
-  img_set_colour(255, 255, 255, 255);
 
   // "LEVEL" text
   img_draw(level_img, 27, 16);

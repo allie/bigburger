@@ -13,37 +13,72 @@ void img_set_colour(u8 r, u8 g, u8 b, u8 a) {
   gDPSetPrimColor(glistp++, 0, 0, r, g, b, a);
 }
 
-void img_draw(Img img, float x, float y) {
-  int tx, ty, sx, sy, ti = 0;
+// Structure that we can map the anonymous structs defined in our
+// image data files with. pixels is an unknown length, so sizeof won't
+// work, but the size information is included in the structure.
+typedef struct {
+  u32 width;
+  u32 height;
+  u32 size;
+  u32 chunk_height;
+  u32 chunk_count;
+} Img;
 
-  for (ty = 0; ty < img.num_tiles_y; ty++) {
-    for (tx = 0; tx < img.num_tiles_x; tx++) {
-      sx = x + tx * img.tile_width;
-      sy = y + ty * img.tile_height;
+void _img_draw(void* img_data, float x, float y) {
+  u32 chunk, cy, chunk_height;
 
-      gDPLoadTextureBlock(
-        glistp++,
-        img.tiles[ti].data,
-        G_IM_FMT_RGBA, G_IM_SIZ_16b,
-        img.tile_width,
-        img.tile_height,
-        0,
-        G_TX_WRAP, G_TX_WRAP,
-        G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD
-      );
-      gSPTextureRectangle(
-        glistp++,
-        sx << 2,
-        sy << 2,
-        (sx + img.tile_width) << 2,
-        (sy + img.tile_height) << 2,
-        G_TX_RENDERTILE,
-        0 << 5, 0 << 5,
-        1 << 10, 1 << 10
-      );
+  // Cast data to an Img so we can easily access the metadata
+  Img img = *((Img*)(img_data));
+  // Pixel data comes immediately after the metadata
+  u16* pixels = img_data + sizeof(Img);
 
-      ti++;
-    }
+  // Calculate destination screen coordinate X components
+  // Top left
+  u32 sx1 = (u32)(x * (1 << 2)); // Convert float to 10.2 fixed point
+  u32 sy1 = 0; // To be calculated by chunk
+  // Bottom right
+  u32 sx2 = sx1 + (img.width << 2);
+  u32 sy2 = 0; // To be calculated by chunk
+
+  for (chunk = 0; chunk < img.chunk_count; chunk++) {
+    // y coordinate of the chunk, relative to the top of the image
+    cy = chunk * img.chunk_height;
+
+    // Height of the chunk
+    // If this is the last chunk, the height will be the remaining height of the image
+    // Otherwise, the chunk height is just img.chunk_height
+    chunk_height = chunk == img.chunk_count - 1 ? img.height - cy : img.chunk_height;
+
+    // Calculate destination screen coordinate Y components
+    // Top left
+    sy1 = (u32)(y * (1 << 2)) + (cy << 2); // Convert float to 10.2 fixed point
+    // Bottom right
+    sy2 = sy1 + (chunk_height << 2);
+
+    // Load the chunk into TMEM
+    gDPLoadTextureTile(
+      glistp++,
+      pixels, // Pixel data
+      G_IM_FMT_RGBA, // Pixel format
+      G_IM_SIZ_16b, // Pixel size
+      img.width, // Width of the whole image
+      img.height, // Height of the whole image
+      0, cy, // Top left corner of the chunk
+      img.width - 1, cy + chunk_height - 1, // Bottom right corner of the chunk
+      0, // Palette
+      G_TX_WRAP, G_TX_WRAP,
+      G_TX_NOMASK, G_TX_NOMASK,
+      G_TX_NOLOD, G_TX_NOLOD
+    );
+
+    // Draw the chunk on the screen
+    gSPTextureRectangle(
+      glistp++,
+      sx1, sy1, // Top left screen coordinate
+      sx2, sy2, // Bottom right screen coordinate
+      G_TX_RENDERTILE,
+      0 << 5, cy << 5,
+      1 << 10, 1 << 10
+    );
   }
 }

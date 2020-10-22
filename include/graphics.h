@@ -7,6 +7,8 @@
 
 #define SCREEN_W 320
 #define SCREEN_H 240
+#define SAFE_AREA_H 24
+#define SAFE_AREA_V 16
 
 #define MAX_TASKS 3
 #define GLIST_LENGTH 2048

@@ -10,6 +10,7 @@
 #include "colour.h"
 #include "img.h"
 #include "popup.h"
+#include "number.h"
 
 #include "models/bun.h"
 #include "models/patty.h"
@@ -19,8 +20,6 @@
 #include "models/onion.h"
 #include "models/spatula.h"
 
-// #include "textures/balance_bg.h"
-// #include "textures/balance_arrow.h"
 #include "textures/level.h"
 #include "textures/next_up.h"
 #include "textures/next_big.h"
@@ -45,6 +44,11 @@
 #define SWEET_SPOT_RANGE 30
 #define BUN_RANGE 220
 
+#define HUD_PADDING_Y 8
+
+#define SCORE_GREAT 1000
+#define SCORE_GOOD 500
+
 extern NUContData controller[1];
 
 static bool paused = FALSE;
@@ -58,6 +62,7 @@ static Part current_part;
 static Part parts[MAX_PARTS];
 static Part part_queue[PART_QUEUE_LENGTH];
 
+static u64 score = 0;
 static u32 part_count = 0;
 static u32 current_y = 0;
 static f32 centre_of_mass = 0;
@@ -77,21 +82,32 @@ static void draw_hud() {
   // Set the image colour to white with full alpha
   img_set_colour(255, 255, 255, 255);
 
-  // Balance meter background
-  // img_draw(balance_bg_img, SCREEN_W / 2 - balance_bg_img.width / 2, 45);
-
-  // Balance meter arrow
-  // img_draw(balance_arrow_img, SCREEN_W / 2 - balance_arrow_img.width / 2, 45 - 8);
-
   // "LEVEL" text
-  img_draw(level_img, 27, 16);
+  img_draw(level_img, SAFE_AREA_H, SAFE_AREA_V);
+  // Current level value
+  number_draw(
+    part_count + 1,
+    SAFE_AREA_H,
+    SAFE_AREA_V + next_up_img.height + HUD_PADDING_Y
+  );
 
   // "NEXT UP" text
-  img_draw(next_up_img, 246, 16);
+  img_draw(next_up_img, SCREEN_W - SAFE_AREA_H - next_up_img.width, SAFE_AREA_V);
 
   // Upcoming piece backgrounds
-  img_draw(next_big_img, 255, 34);
-  img_draw(next_small_img, 259, 74);
+  img_draw(
+    next_big_img,
+    SCREEN_W - SAFE_AREA_H - next_big_img.width,
+    SAFE_AREA_V + next_up_img.height + HUD_PADDING_Y
+  );
+  img_draw(
+    next_small_img,
+    SCREEN_W - SAFE_AREA_H - next_small_img.width,
+    SAFE_AREA_V + next_up_img.height + next_big_img.height + HUD_PADDING_Y * 2
+  );
+
+  // Score
+  number_draw_0_padded(score, 1, NUMBER_ALIGN_CENTRE, SAFE_AREA_V);
 
   // Draw popups
   popup_draw();
@@ -248,11 +264,13 @@ static void place_current_part() {
   // If this was a sweet spot hit, popup great
   if (in_sweet_spot) {
     popup_show(POPUP_GREAT);
+    score += SCORE_GREAT;
   } else {
     if (dist >= max_safe_dist) {
       popup_show(POPUP_MISS);
     } else {
       popup_show(POPUP_GOOD);
+      score += SCORE_GOOD;
     }
   }
 }
@@ -293,6 +311,7 @@ void game_init(void) {
   int i;
 
   // Reset some variables
+  score = 0;
   part_count = 0;
   current_y = 0;
   centre_of_mass = 0;

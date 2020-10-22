@@ -49,6 +49,8 @@
 #define SCORE_GREAT 1000
 #define SCORE_GOOD 500
 
+#define STARTING_LIVES 3
+
 #define SHRINK_ANIM_DURATION 0.05
 
 extern NUContData controller[1];
@@ -65,6 +67,7 @@ static Part parts[MAX_PARTS];
 static Part part_queue[PART_QUEUE_LENGTH];
 
 static u64 score = 0;
+static u32 lives = STARTING_LIVES;
 static u32 part_count = 0;
 static u32 current_y = 0;
 static f32 centre_of_mass = 0;
@@ -231,7 +234,8 @@ static void place_current_part() {
   float max_safe_dist = part_count > 0 ? parts[part_count - 1].size / 2 * parts[part_count - 1].obj.scale : BUN_RANGE;
 
   // Update current_y
-  current_y += current_part.height * current_part.obj.scale;
+  float camera_raise = current_part.height * current_part.obj.scale;
+  current_y += camera_raise;
 
   // Stop current_part from moving
   current_part.obj.vel.x = 0;
@@ -273,9 +277,17 @@ static void place_current_part() {
     popup_show(POPUP_GREAT);
     score += SCORE_GREAT;
   } else {
+    // Check for a miss
     if (dist >= max_safe_dist) {
       popup_show(POPUP_MISS);
+      lives--;
+      part_count--;
+      current_y -= camera_raise;
+      current_part.obj.pos.y = current_y;
+      // Cancel the camera raise animation
+      camera_y.playing = FALSE;
     } else {
+      // Just good.
       popup_show(POPUP_GOOD);
       score += SCORE_GOOD;
     }
@@ -286,19 +298,28 @@ static void update_current_part(double dt) {
   current_part.obj.pos.x += current_part.obj.vel.x * dt;
   if (current_part.obj.pos.x >= MAX_X) {
     current_part.obj.pos.x = MAX_X;
-    current_part.obj.vel.x *= -1;
-    easing_init(shrink_anim, &current_part.obj.scale, SHRINK_ANIM_DURATION, current_part.obj.scale, current_part.obj.scale - 0.2, easing_linear_f);
-    easing_play(shrink_anim);
   }
   if (current_part.obj.pos.x <= MIN_X) {
     current_part.obj.pos.x = MIN_X;
+  }
+  if (current_part.obj.pos.x >= MAX_X || current_part.obj.pos.x <= MIN_X) {
     current_part.obj.vel.x *= -1;
     easing_init(shrink_anim, &current_part.obj.scale, SHRINK_ANIM_DURATION, current_part.obj.scale, current_part.obj.scale - 0.2, easing_linear_f);
     easing_play(shrink_anim);
   }
 
-  // Grow the piece for a brief moment when it passes the sweet spot
-  // This code is kind of a mess...
+  // If the current part's scale has shrunk to 0, it's an automatic miss
+  if (fabs(current_part.obj.scale) <= EPSILON) {
+    popup_show(POPUP_MISS);
+    lives--;
+    update_part_queue();
+    init_current_part();
+    current_part.obj.scale = 1;
+    current_part.obj.pos.y = current_y;
+    return;
+  }
+
+  // Keep track of whether the part is in the sweet spot
   if (part_count > 0) {
     if (fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) < SWEET_SPOT_RANGE) {
       in_sweet_spot = TRUE;
@@ -319,6 +340,7 @@ void game_init(void) {
 
   // Reset some variables
   score = 0;
+  lives = STARTING_LIVES;
   part_count = 0;
   current_y = 0;
   centre_of_mass = 0;
@@ -410,6 +432,11 @@ void game_update(double dt) {
 
   // Update the HUD
   popup_update(dt);
+
+  // Check if the game is lost
+  if (lives == 0) {
+    game_init();
+  }
 }
 
 static void draw_part(Part* part) {

@@ -11,19 +11,7 @@
 #include "img.h"
 #include "popup.h"
 #include "number.h"
-
-#include "models/bun.h"
-#include "models/patty.h"
-#include "models/cheese.h"
-#include "models/lettuce.h"
-#include "models/tomato.h"
-#include "models/onion.h"
-#include "models/spatula.h"
-
-#include "textures/level.h"
-#include "textures/next_up.h"
-#include "textures/next_big.h"
-#include "textures/next_small.h"
+#include "assets.h"
 
 #define MAX_PARTS 1001
 #define PART_QUEUE_LENGTH 3
@@ -52,8 +40,11 @@
 #define STARTING_LIVES 3
 
 #define SHRINK_ANIM_DURATION 0.05
+#define GROW_ANIM_DURATION 0.1
 
+// Globals
 extern NUContData controller[1];
+extern bool in_intro;
 
 static bool paused = FALSE;
 static bool show_debug_console = FALSE;
@@ -77,6 +68,7 @@ static bool in_sweet_spot = FALSE;
 static EasingF camera_y;
 static EasingF spatula_anim;
 static EasingF shrink_anim;
+static EasingF grow_anim;
 
 static Hsv bg_hsv;
 static Rgb bg_rgb;
@@ -231,10 +223,10 @@ static void place_current_part() {
     fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) :
     fabs(current_part.obj.pos.x);
 
-  float max_safe_dist = part_count > 0 ? parts[part_count - 1].size / 2 * parts[part_count - 1].obj.scale : BUN_RANGE;
+  float max_safe_dist = part_count > 0 ? parts[part_count - 1].size / 2 : BUN_RANGE;
 
   // Update current_y
-  float camera_raise = current_part.height * current_part.obj.scale;
+  float camera_raise = current_part.height;
   current_y += camera_raise;
 
   // Stop current_part from moving
@@ -261,6 +253,19 @@ static void place_current_part() {
   // Set the speed and position of the new current_part
   init_current_part();
 
+  // Start animation to grow the placed part back to its original size, if it shrunk
+  if ((int)(parts[part_count - 1].obj.scale) < 1) {
+    easing_init(
+      grow_anim,
+      &parts[part_count - 1].obj.scale,
+      (1 - parts[part_count - 1].obj.scale) * GROW_ANIM_DURATION,
+      parts[part_count - 1].obj.scale,
+      1,
+      easing_linear_f
+    );
+    easing_play(grow_anim);
+  }
+
   // Reset the scale for the current part and stop the shrink animation
   current_part.obj.scale = 1;
   shrink_anim.playing = FALSE;
@@ -274,12 +279,12 @@ static void place_current_part() {
 
   // If this was a sweet spot hit, popup great
   if (in_sweet_spot) {
-    popup_show(POPUP_GREAT);
+    popup_show(POPUP_GREAT, POPUP_JUDGE_Y, POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
     score += SCORE_GREAT;
   } else {
     // Check for a miss
     if (dist >= max_safe_dist) {
-      popup_show(POPUP_MISS);
+      popup_show(POPUP_MISS, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
       lives--;
       part_count--;
       current_y -= camera_raise;
@@ -288,7 +293,7 @@ static void place_current_part() {
       camera_y.playing = FALSE;
     } else {
       // Just good.
-      popup_show(POPUP_GOOD);
+      popup_show(POPUP_GOOD, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
       score += SCORE_GOOD;
     }
   }
@@ -310,7 +315,7 @@ static void update_current_part(double dt) {
 
   // If the current part's scale has shrunk to 0, it's an automatic miss
   if (fabs(current_part.obj.scale) <= EPSILON) {
-    popup_show(POPUP_MISS);
+    popup_show(POPUP_MISS, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
     lives--;
     update_part_queue();
     init_current_part();
@@ -346,6 +351,7 @@ void game_init(void) {
   centre_of_mass = 0;
   bun_placed = FALSE;
   camera_y.playing = FALSE;
+  spatula_anim.playing = FALSE;
 
   // Reset the bg colour
   bg_hsv.h = 194;
@@ -428,6 +434,10 @@ void game_update(double dt) {
     easing_update(shrink_anim, dt);
   }
 
+  if (grow_anim.playing) {
+    easing_update(grow_anim, dt);
+  }
+
   update_current_part(dt);
 
   // Update the HUD
@@ -435,7 +445,7 @@ void game_update(double dt) {
 
   // Check if the game is lost
   if (lives == 0) {
-    game_init();
+    in_intro = TRUE; // Boot to the title screen
   }
 }
 

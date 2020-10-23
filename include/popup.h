@@ -4,16 +4,20 @@
 #include "common.h"
 #include "easing.h"
 
-#define POPUP_DURATION 0.4
-#define POPUP_Y_ANIM_DURATION 0.1
-#define POPUP_FADE_ANIM_DURATION 0.1
-#define POPUP_START_Y 85
-#define POPUP_END_Y 80
+#define POPUP_VISIBLE_FOREVER -100
+
+#define POPUP_JUDGE_ANIM_DURATION 0.1
+#define POPUP_JUDGE_VISIBLE_DURATION 0.4
+#define POPUP_JUDGE_Y 80
+
+#define POPUP_TITLE_ANIM_DURATION 0.2
+#define POPUP_TITLE_Y 30
 
 enum {
   POPUP_GREAT,
   POPUP_GOOD,
-  POPUP_MISS
+  POPUP_MISS,
+  POPUP_TITLE
 };
 
 typedef struct {
@@ -29,7 +33,7 @@ typedef struct {
 } Popup;
 
 void popup_init();
-void popup_show(int popup_type);
+void popup_show(int popup_type, float y, double anim_duration, double visible_duration);
 void popup_update(double dt);
 void popup_draw();
 

@@ -1,10 +1,7 @@
 #include "popup.h"
 #include "img.h"
 #include "graphics.h"
-
-#include "textures/great.h"
-#include "textures/good.h"
-#include "textures/miss.h"
+#include "assets.h"
 
 static Popup popup;
 
@@ -12,16 +9,16 @@ void popup_init() {
   popup.visible = FALSE;
   popup.popup_type = 0;
   popup.timer = 0;
-  popup.y = POPUP_START_Y;
   popup.opacity = 0;
-  easing_init(popup.anim.y, &popup.y, POPUP_Y_ANIM_DURATION, POPUP_START_Y, POPUP_END_Y, easing_linear_f);
-  easing_init(popup.anim.opacity, &popup.opacity, POPUP_FADE_ANIM_DURATION, 0, 255, easing_linear_i);
 }
 
-void popup_show(int popup_type) {
+void popup_show(int popup_type, float y, double anim_duration, double visible_duration) {
   popup.popup_type = popup_type;
   popup.visible = TRUE;
-  popup.timer = POPUP_DURATION;
+  popup.timer = visible_duration;
+  popup.y = y;
+  easing_init(popup.anim.y, &popup.y, anim_duration, popup.y + 5, popup.y, easing_linear_f);
+  easing_init(popup.anim.opacity, &popup.opacity, anim_duration, 0, 255, easing_linear_i);
   easing_play(popup.anim.y);
   easing_play(popup.anim.opacity);
 }
@@ -31,9 +28,11 @@ void popup_update(double dt) {
     return;
   }
 
-  popup.timer -= dt;
+  if (popup.timer != POPUP_VISIBLE_FOREVER) {
+    popup.timer -= dt;
+  }
 
-  if (popup.timer <= 0) {
+  if (popup.timer <= 0 && popup.timer != POPUP_VISIBLE_FOREVER) {
     popup.visible = FALSE;
   }
 
@@ -47,7 +46,7 @@ void popup_update(double dt) {
 }
 
 void popup_draw() {
-  if (!popup.visible) {
+  if (!popup.visible && popup.popup_type != POPUP_TITLE) {
     return;
   }
 
@@ -64,6 +63,14 @@ void popup_draw() {
 
     case POPUP_MISS:
       img_draw(miss_img, SCREEN_W / 2 - miss_img.width / 2, popup.y);
+      break;
+
+    case POPUP_TITLE:
+      img_draw(
+        title_screen_logo_img,
+        SCREEN_W / 2 - title_screen_logo_img.width / 2 + 5,
+        popup.y
+      );
       break;
 
     default:

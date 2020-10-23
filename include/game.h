@@ -1,5 +1,5 @@
-#ifndef STAGES_H
-#define STAGES_H
+#ifndef GAME_H
+#define GAME_H
 
 void game_init();
 void game_update(double dt);

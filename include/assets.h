@@ -20,5 +20,15 @@
 #include "textures/miss.extern.h"
 #include "textures/press_start.extern.h"
 #include "textures/title_screen_logo.extern.h"
+#include "textures/num_0.extern.h"
+#include "textures/num_1.extern.h"
+#include "textures/num_2.extern.h"
+#include "textures/num_3.extern.h"
+#include "textures/num_4.extern.h"
+#include "textures/num_5.extern.h"
+#include "textures/num_6.extern.h"
+#include "textures/num_7.extern.h"
+#include "textures/num_8.extern.h"
+#include "textures/num_9.extern.h"
 
 #endif

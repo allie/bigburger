@@ -1,17 +1,7 @@
 #include "number.h"
 #include "graphics.h"
 #include "img.h"
-
-#include "textures/num_0.h"
-#include "textures/num_1.h"
-#include "textures/num_2.h"
-#include "textures/num_3.h"
-#include "textures/num_4.h"
-#include "textures/num_5.h"
-#include "textures/num_6.h"
-#include "textures/num_7.h"
-#include "textures/num_8.h"
-#include "textures/num_9.h"
+#include "assets.h"
 
 #define MAX_DIGITS 19
 

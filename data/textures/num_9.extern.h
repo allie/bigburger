@@ -5,5 +5,5 @@ extern struct {
   u32 size;
   u32 chunk_height;
   u32 chunk_count;
-  u16 pixels[288];
+  u16 pixels[288] __attribute__((__aligned__(8)));
 } num_9_img;

@@ -13,9 +13,8 @@ void img_set_colour(u8 r, u8 g, u8 b, u8 a) {
   gDPSetPrimColor(glistp++, 0, 0, r, g, b, a);
 }
 
-// Structure that we can map the anonymous structs defined in our
-// image data files with. pixels is an unknown length, so sizeof won't
-// work, but the size information is included in the structure.
+// Structure that we can map the structs defined in our
+// image data files with.
 typedef struct {
   u32 width;
   u32 height;
@@ -24,13 +23,15 @@ typedef struct {
   u32 chunk_count;
 } Img;
 
+char conbuf[20];
+
 void _img_draw(void* img_data, float x, float y) {
   u32 chunk, cy, chunk_height;
 
   // Cast data to an Img so we can easily access the metadata
   Img img = *((Img*)(img_data));
   // Pixel data comes immediately after the metadata
-  u16* pixels = img_data + sizeof(Img);
+  u16* pixels = img_data + 24;
 
   // Calculate destination screen coordinate X components
   // Top left

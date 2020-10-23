@@ -6,8 +6,8 @@ struct {
   u32 size;
   u32 chunk_height;
   u32 chunk_count;
-  u16 pixels[7];
-} balance_fill_img = {
+  u16 pixels[7] __attribute__((__aligned__(8)));
+} balance_fill_img __attribute__((__aligned__(8))) = {
   1,
   7,
   7,

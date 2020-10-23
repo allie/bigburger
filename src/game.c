@@ -537,7 +537,6 @@ void game_draw(void) {
     nuDebConWindowSize(0, 5, 5);
     nuDebConTextPos(0, 0, 0);
     nuDebConTextColor(0, NU_DEB_CON_TEXT_WHITE);
-    // Write some text
     // nuDebConCPuts(0, "");
     nuDebConDispEX2(NU_SC_NOSWAPBUFFER);
   }

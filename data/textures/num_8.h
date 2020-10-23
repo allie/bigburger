@@ -6,8 +6,8 @@ struct {
   u32 size;
   u32 chunk_height;
   u32 chunk_count;
-  u16 pixels[266];
-} num_8_img = {
+  u16 pixels[266] __attribute__((__aligned__(8)));
+} num_8_img __attribute__((__aligned__(8))) = {
   14,
   19,
   266,

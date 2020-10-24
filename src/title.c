@@ -22,13 +22,13 @@
 #define BLINK_PERIOD 1
 
 #define STACK_START_TIME 0.1
-#define STACK_SPEED 20000
-#define STACK_SPIN_SPEED 100
+#define STACK_SPEED 10000
+#define STACK_SPIN_SPEED 20
 
-#define LOGO_START_TIME 1.3
-#define START_BLINKING_TIME 0.8
+#define LOGO_START_TIME 2.0
+#define START_BLINKING_TIME 1.5
 
-#define BUN_DROP_DURATION 0.05
+#define BUN_DROP_DURATION 0.1
 
 extern NUContData controller[1];
 
@@ -96,7 +96,7 @@ void title_init() {
   burger_rot = 0;
 
   // Reset the bg colour
-  bg_hsv.h = hue = 194;
+  bg_hsv.h = hue = 90;
   bg_hsv.s = 255;
   bg_hsv.v = 180;
   bg_rgb = hsv_to_rgb(bg_hsv);

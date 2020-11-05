@@ -2,6 +2,7 @@
 #include "common.h"
 #include "title.h"
 #include "game.h"
+#include "timer.h"
 
 char heap[1024 * 512 * 1];
 
@@ -18,6 +19,9 @@ static void vsync_callback(int pending) {
   now = osGetTime();
   dt = OS_CYCLES_TO_USEC(now - last) / 1000000.0;
   last = now;
+
+  // Update timer system, running any callbacks before the game state update
+  timer_update(dt);
 
   nuContDataGetEx(controller, 0);
 
@@ -52,6 +56,9 @@ void mainproc(void* dummy) {
   nuContInit();
 
   InitHeap(heap, sizeof(heap));
+
+  // Initialize timer system
+  timer_init();
 
   title_init();
 

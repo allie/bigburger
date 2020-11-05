@@ -42,6 +42,8 @@
 #define SHRINK_ANIM_DURATION 0.05
 #define GROW_ANIM_DURATION 0.1
 
+#define SECONDARY_PART_WINDOW 0.5
+
 // Globals
 extern NUContData controller[1];
 extern bool in_intro;
@@ -64,6 +66,7 @@ static u32 current_y = 0;
 static f32 centre_of_mass = 0;
 static bool bun_placed = FALSE;
 static bool in_sweet_spot = FALSE;
+static bool can_place_secondary_part = FALSE;
 
 static EasingF camera_y;
 static EasingF spatula_anim;
@@ -241,8 +244,38 @@ static void place_current_part() {
   easing_init(spatula_anim, &spatula.rot.x, SPATULA_ANIM_DURATION, 0, SPATULA_ROT_X_MAX, easing_linear_f);
   easing_play(spatula_anim);
 
+  // Update the background colour
+  bg_hsv.h--;
+  bg_rgb = hsv_to_rgb(bg_hsv);
+
   // Update random part queue
   parts[part_count++] = current_part;
+
+  // If this was a sweet spot hit, popup great
+  if (in_sweet_spot) {
+    popup_show(POPUP_GREAT, POPUP_JUDGE_Y, POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
+    score += SCORE_GREAT;
+  } else {
+    // Check for a miss
+    if (dist >= max_safe_dist) {
+      popup_show(POPUP_MISS, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
+      lives--;
+      part_count--;
+      current_y -= camera_raise;
+      current_part.obj.pos.y = current_y;
+      // Cancel the camera raise animation
+      camera_y.playing = FALSE;
+    } else {
+      // Just good.
+      popup_show(POPUP_GOOD, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
+      score += SCORE_GOOD;
+    }
+  }
+}
+
+static void spawn_next_part() {
+  // End secondary ingredient window
+  can_place_secondary_part = FALSE;
 
   // Advance the part queue
   update_part_queue();
@@ -272,31 +305,6 @@ static void place_current_part() {
 
   // Move up the spatula
   spatula.pos.y = current_y + SPATULA_BASE_Y;
-
-  // Update the background colour
-  bg_hsv.h--;
-  bg_rgb = hsv_to_rgb(bg_hsv);
-
-  // If this was a sweet spot hit, popup great
-  if (in_sweet_spot) {
-    popup_show(POPUP_GREAT, POPUP_JUDGE_Y, POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
-    score += SCORE_GREAT;
-  } else {
-    // Check for a miss
-    if (dist >= max_safe_dist) {
-      popup_show(POPUP_MISS, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
-      lives--;
-      part_count--;
-      current_y -= camera_raise;
-      current_part.obj.pos.y = current_y;
-      // Cancel the camera raise animation
-      camera_y.playing = FALSE;
-    } else {
-      // Just good.
-      popup_show(POPUP_GOOD, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
-      score += SCORE_GOOD;
-    }
-  }
 }
 
 static void update_current_part(double dt) {
@@ -352,6 +360,7 @@ void game_init(void) {
   bun_placed = FALSE;
   camera_y.playing = FALSE;
   spatula_anim.playing = FALSE;
+  can_place_secondary_part = FALSE;
 
   // Reset the bg colour
   bg_hsv.h = 194;
@@ -414,8 +423,10 @@ void game_update(double dt) {
     return;
   }
 
-  if (controller[0].trigger & A_BUTTON) {
+  if (!can_place_secondary_part && controller[0].trigger & A_BUTTON) {
     place_current_part();
+    can_place_secondary_part = TRUE;
+    timer_run_callback(spawn_next_part, NULL, SECONDARY_PART_WINDOW);
   }
 
   if (controller[0].trigger & B_BUTTON) {
@@ -502,7 +513,7 @@ void game_draw(void) {
   }
 
   // Current part
-  if (!bun_placed) {
+  if (!bun_placed && !can_place_secondary_part) {
     draw_part(&current_part);
   }
 

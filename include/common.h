@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <nusys.h>
+#include <assert.h>
 
 #define EPSILON 0.00001f
 

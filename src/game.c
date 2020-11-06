@@ -107,13 +107,18 @@ static void draw_hud() {
   // Set the image colour to white with full alpha
   img_set_colour(255, 255, 255, 255);
 
+  // "SCORE" text
+  img_draw(score_img, SAFE_AREA_H, SAFE_AREA_V);
+  // Score value
+  number_draw_0_padded(score, 1, SAFE_AREA_H, 31);
+
   // "LEVEL" text
-  img_draw(level_img, SAFE_AREA_H, SAFE_AREA_V);
+  img_draw(level_img, SAFE_AREA_H, 58);
   // Current level value
   number_draw(
     part_count + 1,
     SAFE_AREA_H,
-    SAFE_AREA_V + next_up_img.height + HUD_PADDING_Y
+    72
   );
 
   // "NEXT UP" text
@@ -123,16 +128,27 @@ static void draw_hud() {
   img_draw(
     next_big_img,
     SCREEN_W - SAFE_AREA_H - next_big_img.width,
-    SAFE_AREA_V + next_up_img.height + HUD_PADDING_Y
+    31
   );
   img_draw(
     next_small_img,
     SCREEN_W - SAFE_AREA_H - next_small_img.width,
-    SAFE_AREA_V + next_up_img.height + next_big_img.height + HUD_PADDING_Y * 2
+    67
   );
 
-  // Score
-  number_draw_0_padded(score, 1, NUMBER_ALIGN_CENTRE, SAFE_AREA_V);
+  // Draw dpad
+  img_draw(
+    dpad_img,
+    35,
+    171
+  );
+
+  // Draw A button
+  img_draw(
+    a_button_img,
+    247,
+    177
+  );
 
   // Draw popups
   popup_draw();

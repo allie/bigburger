@@ -15,3 +15,7 @@ Then, assuming everything is in its standard location, run `build.bat` to build 
 <p align="center">
   <img alt="Gameplay screenshot" src="https://i.imgur.com/hCcRPik.png" />
 </p>
+
+## Third-party Assets
+Most assets in this game are original, but the controller button icons
+came from [Smash Wiki](https://www.ssbwiki.com/Category:Button_icons_(N64)) and are being adapted under the [Attribution-ShareAlike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/) license.

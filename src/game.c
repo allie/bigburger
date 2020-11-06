@@ -198,13 +198,14 @@ static Part get_next_part() {
 static void update_part_queue() {
   int i;
 
-  current_part = part_queue[PART_QUEUE_LENGTH - 1];
+  // Pop the current part off the queue
+  current_part = part_queue[2];
 
-  for (i = 0; i < PART_QUEUE_LENGTH; i++) {
-    if (i + 1 <= PART_QUEUE_LENGTH - 1) {
-      part_queue[i + 1] = part_queue[i];
-    }
-  }
+  // Move ingredients forward in the queue
+  part_queue[2] = part_queue[1];
+  part_queue[1] = part_queue[0];
+
+  // Generate a new ingredient at the end of the queue
   part_queue[0].ingredient = -1;
   part_queue[0] = get_next_part();
 }
@@ -267,14 +268,6 @@ static void place_current_part() {
   easing_init(spatula_anim, &spatula.rot.x, SPATULA_ANIM_DURATION, 0, SPATULA_ROT_X_MAX, easing_linear_f);
   easing_play(spatula_anim);
 
-  // Update the background colour
-  bg_hsv.h--;
-  // Every 100 levels, dramatically change the colour
-  if ((part_count) % 100 == 0) {
-    bg_hsv.h -= 127;
-  }
-  bg_rgb = hsv_to_rgb(bg_hsv);
-
   // Update random part queue
   parts[part_count++] = current_part;
 
@@ -285,6 +278,14 @@ static void place_current_part() {
   ) {
     current_difficulty++;
   }
+
+  // Update the background colour
+  bg_hsv.h--;
+  // Every 100 levels, dramatically change the colour
+  if ((part_count + 1) % 100 == 0) {
+    bg_hsv.h -= 127;
+  }
+  bg_rgb = hsv_to_rgb(bg_hsv);
 
   // If this was a sweet spot hit, popup great
   if (in_sweet_spot) {

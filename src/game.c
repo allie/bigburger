@@ -36,6 +36,7 @@
 
 #define SCORE_GREAT 1000
 #define SCORE_GOOD 500
+#define SCORE_CENTRE_BONUS 500
 
 #define STARTING_LIVES 3
 
@@ -249,6 +250,7 @@ static void place_current_part() {
   float dist = part_count > 0 ?
     fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) :
     fabs(current_part.obj.pos.x);
+  float dist_from_centre = fabs(current_part.obj.pos.x);
 
   float max_safe_dist = part_count > 0 ? parts[part_count - 1].size / 2 : BUN_RANGE;
 
@@ -307,6 +309,9 @@ static void place_current_part() {
       score += SCORE_GOOD;
     }
   }
+
+  // Add some extra points for keeping the stack near the centre of the screen
+  score += (((MAX_X / 2) - dist_from_centre) / (MAX_X / 2)) * SCORE_CENTRE_BONUS;
 }
 
 static void spawn_next_part() {

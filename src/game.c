@@ -21,10 +21,10 @@
 #define SPATULA_ROT_X_MAX 90
 #define SPATULA_ANIM_DURATION 0.4
 
-#define MIN_X -400
-#define MAX_X 400
+#define MIN_X -700
+#define MAX_X 700
 
-#define PART_BASE_SPEED 500
+#define PART_BASE_SPEED 600
 #define LEVEL_SPEED_INCREASE 10
 
 #define MAX_CENTRE_OF_MASS 220
@@ -42,7 +42,7 @@
 #define SHRINK_ANIM_DURATION 0.05
 #define GROW_ANIM_DURATION 0.1
 
-#define SECONDARY_PART_WINDOW 0.5
+#define SECONDARY_PART_WINDOW 0.3
 
 // Globals
 extern NUContData controller[1];
@@ -75,6 +75,29 @@ static EasingF grow_anim;
 
 static Hsv bg_hsv;
 static Rgb bg_rgb;
+
+// Represents a point in the difficulty curve
+typedef struct {
+  int start;
+  int end;
+  double base_speed;
+  double level_speed_increase;
+} Difficulty;
+
+static Difficulty difficulty_curve[] = {
+  { 1,   99,  600,  10 }, // Moderate speed increase from 1-99
+  { 100, 199, 1600, 12 }, // Slightly increase speedup at 100
+  { 200, 0,   800,  20 }  // Slowdown at level 200 with rapid speedup
+};
+
+static int current_difficulty = 0;
+
+// Get the current part speed by applying the difficulty curve to the current level
+static double get_current_speed() {
+  return difficulty_curve[current_difficulty].base_speed +
+    ((part_count - difficulty_curve[current_difficulty].start + 1) *
+    difficulty_curve[current_difficulty].level_speed_increase);
+}
 
 // Draw the HUD
 static void draw_hud() {
@@ -192,7 +215,7 @@ static void init_current_part() {
     current_part.obj.pos.x *= -1;
   }
 
-  current_part.obj.vel.x = PART_BASE_SPEED + part_count * LEVEL_SPEED_INCREASE;
+  current_part.obj.vel.x = get_current_speed();
   if (current_part.obj.pos.x > 0) {
     current_part.obj.vel.x *= -1;
   }
@@ -246,10 +269,22 @@ static void place_current_part() {
 
   // Update the background colour
   bg_hsv.h--;
+  // Every 100 levels, dramatically change the colour
+  if ((part_count) % 100 == 0) {
+    bg_hsv.h -= 127;
+  }
   bg_rgb = hsv_to_rgb(bg_hsv);
 
   // Update random part queue
   parts[part_count++] = current_part;
+
+  // Update difficulty level
+  if (
+    difficulty_curve[current_difficulty].end != 0 &&
+    difficulty_curve[current_difficulty].end < part_count + 1
+  ) {
+    current_difficulty++;
+  }
 
   // If this was a sweet spot hit, popup great
   if (in_sweet_spot) {
@@ -361,6 +396,7 @@ void game_init(void) {
   camera_y.playing = FALSE;
   spatula_anim.playing = FALSE;
   can_place_secondary_part = FALSE;
+  current_difficulty = 0;
 
   // Reset the bg colour
   bg_hsv.h = 194;
@@ -426,7 +462,11 @@ void game_update(double dt) {
   if (!can_place_secondary_part && controller[0].trigger & A_BUTTON) {
     place_current_part();
     can_place_secondary_part = TRUE;
-    timer_run_callback(spawn_next_part, NULL, SECONDARY_PART_WINDOW);
+    timer_run_callback(
+      spawn_next_part,
+      NULL,
+      SECONDARY_PART_WINDOW - (SECONDARY_PART_WINDOW * ((part_count) / (MAX_PARTS - 1)))
+    );
   }
 
   if (controller[0].trigger & B_BUTTON) {
@@ -548,8 +588,8 @@ void game_draw(void) {
     nuDebConWindowSize(0, 5, 5);
     nuDebConTextPos(0, 0, 0);
     nuDebConTextColor(0, NU_DEB_CON_TEXT_WHITE);
-    // nuDebConCPuts(0, "");
-    nuDebConDispEX2(NU_SC_NOSWAPBUFFER);
+    // nuDebConCPuts(0, console);
+    nuDebConDisp(NU_SC_SWAPBUFFER);
   }
 #endif
 

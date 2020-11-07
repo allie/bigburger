@@ -57,12 +57,12 @@ void graphics_clear(u8 r, u8 g, u8 b) {
 
 void graphics_start_object(Object* object, bool xlu) {
   gDPSetCycleType(glistp++, G_CYC_1CYCLE);
-  gSPSetGeometryMode(glistp++, G_SHADE | G_SHADING_SMOOTH | G_LIGHTING | G_CULL_BACK | G_ZBUFFER);
+  gSPSetGeometryMode(glistp++, G_SHADE | G_SHADING_SMOOTH | G_LIGHTING | G_CULL_BACK);
   gDPSetCombineMode(glistp++, G_CC_SHADE, G_CC_SHADE);
   gDPSetRenderMode(
     glistp++,
-    xlu ? G_RM_AA_ZB_XLU_SURF : G_RM_AA_ZB_OPA_SURF,
-    xlu ? G_RM_AA_ZB_XLU_SURF2 : G_RM_AA_ZB_OPA_SURF2
+    xlu ? G_RM_AA_ZB_XLU_SURF : G_RM_AA_OPA_SURF,
+    xlu ? G_RM_AA_ZB_XLU_SURF2 : G_RM_AA_OPA_SURF2
   );
   guPosition(
     &object->transform,

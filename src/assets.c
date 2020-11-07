@@ -53,3 +53,4 @@
 #include "textures/lettuce_small.h"
 #include "textures/tomato_small.h"
 #include "textures/onion_small.h"
+#include "textures/spatula.h"

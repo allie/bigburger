@@ -179,18 +179,13 @@ static void draw_hud() {
   }
 
   // Draw dpad
-  img_draw(
-    dpad_img,
-    35,
-    171
-  );
+  img_draw(dpad_img, 35, 171);
 
   // Draw A button
-  img_draw(
-    a_button_img,
-    247,
-    177
-  );
+  img_draw(a_button_img, 247, 177);
+
+  // Draw spatula icon over A button
+  img_draw(spatula_img, 253, 168);
 
   // Draw popups
   popup_draw();

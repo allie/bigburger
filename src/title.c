@@ -145,10 +145,17 @@ static void update_current_part(double dt) {
     current_part.obj.vel.x *= -1;
     // Move it up to current_y
     current_part.obj.pos.y = current_y;
-    // Randomize the angle
-    current_part.obj.rot.y = rand() % 360;
-    // And finally, randomize the ingredient
+    // Randomize the ingredient
     current_part.ingredient = rand() % 5;
+    // Randomize the angle
+    if (current_part.ingredient == LETTUCE) {
+      // If the current part is lettuce, only rotate it to specific angles
+      // so that the shading stands out
+      current_part.obj.rot.y = rand() % 80 - 40;
+    } else {
+      // Otherwise, any angle goes
+      current_part.obj.rot.y = rand() % 360;
+    }
 
     // Generate a new stopping point
     stopping_point = get_stopping_point();

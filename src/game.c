@@ -205,7 +205,7 @@ static Part get_next_part() {
   }
 
   vec3f_set(part.obj.pos, 0, 0, 0);
-  vec3f_set(part.obj.rot, 0, rand() % 360, 0);
+  vec3f_set(part.obj.rot, 0, 0, 0);
   vec3f_set(part.obj.vel, 0, 0, 0);
   part.obj.scale = 1;
 
@@ -236,6 +236,15 @@ static void init_current_part() {
   current_part.obj.vel.x = get_current_speed();
   if (current_part.obj.pos.x > 0) {
     current_part.obj.vel.x *= -1;
+  }
+
+  if (current_part.ingredient == LETTUCE) {
+    // If the current part is lettuce, only rotate it to specific angles
+    // so that the shading stands out
+    current_part.obj.rot.y = rand() % 80 - 40;
+  } else {
+    // Otherwise, any angle goes
+    current_part.obj.rot.y = rand() % 360;
   }
 }
 

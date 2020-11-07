@@ -44,5 +44,15 @@
 #include "textures/rank_ss.extern.h"
 #include "textures/rank_sss.extern.h"
 #include "textures/score.extern.h"
+#include "textures/meat_big.extern.h"
+#include "textures/cheese_big.extern.h"
+#include "textures/lettuce_big.extern.h"
+#include "textures/tomato_big.extern.h"
+#include "textures/onion_big.extern.h"
+#include "textures/meat_small.extern.h"
+#include "textures/cheese_small.extern.h"
+#include "textures/lettuce_small.extern.h"
+#include "textures/tomato_small.extern.h"
+#include "textures/onion_small.extern.h"
 
 #endif

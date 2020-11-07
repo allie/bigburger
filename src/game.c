@@ -136,6 +136,48 @@ static void draw_hud() {
     67
   );
 
+  // Next upcoming piece
+  switch (part_queue[2].ingredient) {
+    case MEAT:
+      img_draw(meat_big_img, SCREEN_W - SAFE_AREA_H - next_big_img.width, 31);
+      break;
+    case CHEESE:
+      img_draw(cheese_big_img, SCREEN_W - SAFE_AREA_H - next_big_img.width, 31);
+      break;
+    case LETTUCE:
+      img_draw(lettuce_big_img, SCREEN_W - SAFE_AREA_H - next_big_img.width, 31);
+      break;
+    case TOMATO:
+      img_draw(tomato_big_img, SCREEN_W - SAFE_AREA_H - next_big_img.width, 31);
+      break;
+    case ONION:
+      img_draw(onion_big_img, SCREEN_W - SAFE_AREA_H - next_big_img.width, 31);
+      break;
+    default:
+      break;
+  }
+
+  // Upcoming piece after the next one
+  switch (part_queue[1].ingredient) {
+    case MEAT:
+      img_draw(meat_small_img, SCREEN_W - SAFE_AREA_H - next_small_img.width, 67);
+      break;
+    case CHEESE:
+      img_draw(cheese_small_img, SCREEN_W - SAFE_AREA_H - next_small_img.width, 67);
+      break;
+    case LETTUCE:
+      img_draw(lettuce_small_img, SCREEN_W - SAFE_AREA_H - next_small_img.width, 67);
+      break;
+    case TOMATO:
+      img_draw(tomato_small_img, SCREEN_W - SAFE_AREA_H - next_small_img.width, 67);
+      break;
+    case ONION:
+      img_draw(onion_small_img, SCREEN_W - SAFE_AREA_H - next_small_img.width, 67);
+      break;
+    default:
+      break;
+  }
+
   // Draw dpad
   img_draw(
     dpad_img,

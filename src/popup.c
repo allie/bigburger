@@ -73,7 +73,15 @@ void popup_draw() {
       );
       break;
 
+    case POPUP_GAMEOVER:
+      img_draw(game_over_img, SAFE_AREA_H, popup.y);
+      break;
+
     default:
       break;
   }
+}
+
+bool popup_is_playing() {
+  return popup.timer > 0;
 }

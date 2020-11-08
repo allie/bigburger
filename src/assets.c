@@ -54,3 +54,8 @@
 #include "textures/tomato_small.h"
 #include "textures/onion_small.h"
 #include "textures/spatula.h"
+#include "textures/game_over.h"
+#include "textures/try_again.h"
+#include "textures/results_caret.h"
+#include "textures/ingredients.h"
+#include "textures/bracket_offscreen.h"

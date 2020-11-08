@@ -4,5 +4,6 @@
 void game_init();
 void game_update(double dt);
 void game_draw();
+void game_destroy();
 
 #endif

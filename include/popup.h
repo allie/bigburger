@@ -13,11 +13,14 @@
 #define POPUP_TITLE_ANIM_DURATION 0.2
 #define POPUP_TITLE_Y 30
 
+#define POPUP_GAMEOVER_ANIM_DURATION 0.2
+
 enum {
   POPUP_GREAT,
   POPUP_GOOD,
   POPUP_MISS,
-  POPUP_TITLE
+  POPUP_TITLE,
+  POPUP_GAMEOVER
 };
 
 typedef struct {
@@ -36,5 +39,6 @@ void popup_init();
 void popup_show(int popup_type, float y, double anim_duration, double visible_duration);
 void popup_update(double dt);
 void popup_draw();
+bool popup_is_playing();
 
 #endif

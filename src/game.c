@@ -11,6 +11,7 @@
 #include "img.h"
 #include "popup.h"
 #include "number.h"
+#include "gamestate.h"
 #include "assets.h"
 
 #define MAX_PARTS 1001
@@ -47,7 +48,6 @@
 
 // Globals
 extern NUContData controller[1];
-extern bool in_intro;
 
 static bool paused = FALSE;
 static bool show_debug_console = FALSE;
@@ -57,12 +57,12 @@ static Object top_bun;
 static Object spatula;
 
 static Part current_part;
-static Part parts[MAX_PARTS];
+Part parts[MAX_PARTS];
 static Part part_queue[PART_QUEUE_LENGTH];
 
-static u64 score = 0;
+u64 score = 0;
 static u32 lives = STARTING_LIVES;
-static u32 part_count = 0;
+u32 part_count = 0;
 static u32 current_y = 0;
 static f32 centre_of_mass = 0;
 static bool bun_placed = FALSE;
@@ -75,7 +75,7 @@ static EasingF shrink_anim;
 static EasingF grow_anim;
 
 static Hsv bg_hsv;
-static Rgb bg_rgb;
+Rgb bg_rgb;
 
 // Represents a point in the difficulty curve
 typedef struct {
@@ -373,7 +373,9 @@ static void place_current_part() {
   }
 
   // Add some extra points for keeping the stack near the centre of the screen
-  score += (((MAX_X / 2) - dist_from_centre) / (MAX_X / 2)) * SCORE_CENTRE_BONUS;
+  if (dist < max_safe_dist) {
+    score += (((MAX_X / 2) - dist_from_centre) / (MAX_X / 2)) * SCORE_CENTRE_BONUS;
+  }
 }
 
 static void spawn_next_part() {
@@ -564,7 +566,8 @@ void game_update(double dt) {
 
   // Check if the game is lost
   if (lives == 0) {
-    in_intro = TRUE; // Boot to the title screen
+    // Go to the results screen if so
+    gamestate_replace(GAMESTATE_RESULT, FALSE, TRUE);
   }
 }
 
@@ -663,4 +666,8 @@ void game_draw(void) {
 
   task_num++;
   task_num %= MAX_TASKS;
+}
+
+void game_destroy() {
+
 }

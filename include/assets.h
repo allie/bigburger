@@ -55,5 +55,10 @@
 #include "textures/tomato_small.extern.h"
 #include "textures/onion_small.extern.h"
 #include "textures/spatula.extern.h"
+#include "textures/game_over.extern.h"
+#include "textures/try_again.extern.h"
+#include "textures/results_caret.extern.h"
+#include "textures/ingredients.extern.h"
+#include "textures/bracket_offscreen.extern.h"
 
 #endif

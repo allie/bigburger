@@ -11,6 +11,7 @@
 #include "img.h"
 #include "popup.h"
 #include "number.h"
+#include "gamestate.h"
 #include "assets.h"
 
 #define MAX_PARTS 20
@@ -161,7 +162,7 @@ static void update_current_part(double dt) {
     stopping_point = get_stopping_point();
 
     // Ease the camera up to the correct Y
-    easing_init(camera_y, &camera.pos.y, 0.05, camera.pos.y, CAMERA_BASE_Y + current_y, easing_linear_f);
+    easing_init(camera_y, &camera.pos.y, 0.1, camera.pos.y, CAMERA_BASE_Y + current_y, easing_linear_f);
     easing_play(camera_y);
 
     // Advance the bg colour wheel
@@ -173,6 +174,11 @@ static void update_current_part(double dt) {
 
 void title_update(double dt) {
   int i;
+
+  // If start is pressed, advance to the game
+  if (controller[0].trigger & START_BUTTON) {
+    gamestate_replace(GAMESTATE_GAME, TRUE, TRUE);
+  }
 
   elapsed += dt;
 
@@ -320,4 +326,9 @@ void title_draw() {
 
   task_num++;
   task_num %= MAX_TASKS;
+}
+
+void title_destroy() {
+  camera_y.playing = FALSE;
+  camera.pos.y = 0;
 }

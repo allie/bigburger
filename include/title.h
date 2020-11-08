@@ -4,5 +4,6 @@
 void title_init();
 void title_update(double dt);
 void title_draw();
+void title_destroy();
 
 #endif

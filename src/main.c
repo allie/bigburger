@@ -1,14 +1,12 @@
 #include <nusys.h>
 #include "common.h"
-#include "title.h"
-#include "game.h"
+#include "gamestate.h"
 #include "timer.h"
 
 char heap[1024 * 512 * 1];
 
 // Globals
 NUContData controller[1];
-bool in_intro = TRUE;
 
 static OSTime last;
 
@@ -25,29 +23,10 @@ static void vsync_callback(int pending) {
 
   nuContDataGetEx(controller, 0);
 
-  if (in_intro && controller[0].trigger & START_BUTTON) {
-    in_intro = FALSE;
-    game_init();
-  }
-
-  if (in_intro) {
-    title_update(dt);
-  } else {
-    game_update(dt);
-    // If booted back to the title screen during this update,
-    // init and update it
-    if (in_intro) {
-      title_init();
-      title_update(dt);
-    }
-  }
+  gamestate_update(dt);
 
   if (pending < 1) {
-    if (in_intro) {
-      title_draw();
-    } else {
-      game_draw();
-    }
+    gamestate_draw();
   }
 }
 
@@ -60,7 +39,11 @@ void mainproc(void* dummy) {
   // Initialize timer system
   timer_init();
 
-  title_init();
+  // Initialize game state manager
+  gamestate_init_manager();
+
+  // Start on the title screen
+  gamestate_replace(GAMESTATE_TITLE, FALSE, TRUE);
 
   last = osGetTime();
   nuGfxFuncSet((NUGfxFunc)vsync_callback);

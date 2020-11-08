@@ -86,9 +86,12 @@ typedef struct {
 } Difficulty;
 
 static Difficulty difficulty_curve[] = {
-  { 1,   99,  600,  10 }, // Moderate speed increase from 1-99
+  { 1,   99,   600, 10 }, // Moderate speed increase from 1-99
   { 100, 199, 1600, 12 }, // Slightly increase speedup at 100
-  { 200, 0,   800,  20 }  // Slowdown at level 200 with rapid speedup
+  { 200, 399,  800, 20 }, // Slowdown at level 200 with rapid speedup
+  { 300, 399, 2800, 10 }, // Chill out a bit after 300. 2800 is pretty fast already!
+  { 400, 499, 3800, 5  }, // Decelerate some more
+  { 500, 0,   4300, 2  }  // Final deceleration. If you reach level 1000, speed would be 5300
 };
 
 static int current_difficulty = 0;

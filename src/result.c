@@ -17,7 +17,7 @@
 #define MAX_X 700
 
 #define STACK_CENTRE 276
-#define STACK_X_RANGE 20
+#define STACK_X_RANGE 30
 #define STACK_MAX_ON_SCREEN 100
 
 #define BLINK_PERIOD 1.5

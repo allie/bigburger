@@ -18,7 +18,7 @@
 
 #define STACK_CENTRE 276
 #define STACK_X_RANGE 30
-#define STACK_MAX_ON_SCREEN 100
+#define STACK_MAX_ON_SCREEN 95
 
 #define BLINK_PERIOD 1.5
 
@@ -39,6 +39,7 @@ int current_part;
 enum {
   STEP_GAME_OVER = 0,
   STEP_STACK,
+  STEP_BUN_DROP,
   STEP_FADE,
   STEP_PRESS_START
 };
@@ -54,6 +55,13 @@ struct {
   EasingI opacity;
   EasingF speed;
 } current_part_anim;
+
+struct {
+  EasingF y_anim;
+  EasingI opacity_anim;
+  float y;
+  int opacity;
+} bun_drop;
 
 struct {
   EasingI opacity_anim;
@@ -79,8 +87,19 @@ static void animate_current_part() {
 }
 
 static void draw_stack() {
-  float x, y;
   int i;
+  float x, y;
+  float bottom = current_part < STACK_MAX_ON_SCREEN ?
+    (SCREEN_H - SAFE_AREA_V - 20) :
+    (SCREEN_H - SAFE_AREA_V - 20) + ((current_part - STACK_MAX_ON_SCREEN) * 2);
+
+  if (current_part < STACK_MAX_ON_SCREEN + 50) {
+    img_draw(
+      bun_bottom_small_img,
+      STACK_CENTRE - 12,
+      bottom
+    );
+  }
 
   for (i = 0; i <= current_part - 1; i++) {
     if (i == current_part - 1) {
@@ -92,9 +111,7 @@ static void draw_stack() {
     }
 
     x -= 12;
-    y = current_part < STACK_MAX_ON_SCREEN ?
-      (SCREEN_H - SAFE_AREA_V - 12) - (i * 2) :
-      (SCREEN_H - SAFE_AREA_V - 12) - (i * 2) + ((current_part - STACK_MAX_ON_SCREEN) * 2);
+    y = bottom - ((i + 1) * 2);
 
     if (y >= SCREEN_H) {
       continue;
@@ -120,6 +137,29 @@ static void draw_stack() {
         break;
     }
   }
+
+  if (current_step > STEP_STACK) {
+    img_set_colour(255, 255, 255, bun_drop.opacity);
+    img_draw(bun_top_small_img, STACK_CENTRE - 12, bun_drop.y);
+  }
+}
+
+static void drop_bun() {
+  current_step = STEP_BUN_DROP;
+  if (current_part < STACK_MAX_ON_SCREEN) {
+    easing_init(
+      bun_drop.y_anim,
+      &bun_drop.y,
+      0.2,
+      (SCREEN_H - SAFE_AREA_V - 20) - ((current_part + 1) * 2) - 24,
+      (SCREEN_H - SAFE_AREA_V - 20) - ((current_part + 1) * 2),
+      easing_linear_f);
+  } else {
+    easing_init(bun_drop.y_anim, &bun_drop.y, 0.2, -28, SAFE_AREA_V - 4, easing_linear_f);
+  }
+  easing_play(bun_drop.y_anim);
+  easing_init(bun_drop.opacity_anim, &bun_drop.opacity, 0.1, 0, 255, easing_linear_i);
+  easing_play(bun_drop.opacity_anim);
 }
 
 void result_init() {
@@ -162,9 +202,23 @@ void result_update(double dt) {
       animate_current_part();
     } else {
       // Otherwise, idk, make fun of the player or something
-      current_step = STEP_FADE;
-      easing_init(hud_fade.opacity_anim, &hud_fade.opacity, 0.5, 0, 255, easing_linear_i);
-      easing_play(hud_fade.opacity_anim);
+      drop_bun();
+    }
+  }
+
+  if (current_step == STEP_BUN_DROP) {
+    if (bun_drop.opacity_anim.playing) {
+      easing_update(bun_drop.opacity_anim, dt);
+    }
+
+    if (bun_drop.y_anim.playing) {
+      easing_update(bun_drop.y_anim, dt);
+
+      if (!bun_drop.y_anim.playing) {
+        current_step = STEP_FADE;
+        easing_init(hud_fade.opacity_anim, &hud_fade.opacity, 0.5, 0, 255, easing_linear_i);
+        easing_play(hud_fade.opacity_anim);
+      }
     }
   }
 
@@ -181,9 +235,7 @@ void result_update(double dt) {
     
         // If the last part has been placed, move on to the next step
         if (current_part >= part_count) {
-          current_step = STEP_FADE;
-          easing_init(hud_fade.opacity_anim, &hud_fade.opacity, 0.5, 0, 255, easing_linear_i);
-          easing_play(hud_fade.opacity_anim);
+          drop_bun();
         } else {
           // Otherwise, animate in the next part
           animate_current_part();

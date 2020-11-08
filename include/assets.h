@@ -49,6 +49,8 @@
 #include "textures/lettuce_big.extern.h"
 #include "textures/tomato_big.extern.h"
 #include "textures/onion_big.extern.h"
+#include "textures/bun_bottom_small.extern.h"
+#include "textures/bun_top_small.extern.h"
 #include "textures/meat_small.extern.h"
 #include "textures/cheese_small.extern.h"
 #include "textures/lettuce_small.extern.h"

@@ -48,6 +48,8 @@
 #include "textures/lettuce_big.h"
 #include "textures/tomato_big.h"
 #include "textures/onion_big.h"
+#include "textures/bun_bottom_small.h"
+#include "textures/bun_top_small.h"
 #include "textures/meat_small.h"
 #include "textures/cheese_small.h"
 #include "textures/lettuce_small.h"

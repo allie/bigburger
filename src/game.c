@@ -310,12 +310,6 @@ static f32 calc_centre_of_mass() {
   return top / total_mass;
 }
 
-static void place_bun() {
-  current_y += current_part.height;
-  top_bun.pos.y = current_y;
-  bun_placed = TRUE;
-}
-
 static void place_current_part() {
   float dist = part_count > 0 ?
     fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) :
@@ -550,10 +544,6 @@ void game_update(double dt) {
     if (part_count + 1 == EXTEND_LEVEL) {
       lives = EXTEND_LIVES;
     }
-  }
-
-  if (controller[0].trigger & B_BUTTON) {
-    place_bun();
   }
 
   if (camera_y.playing) {

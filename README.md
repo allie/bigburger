@@ -3,7 +3,7 @@
 </p>
 
 # Big Burger
-A fast-paced homebrew arcade burger-stacking game for the N64.
+A fast-paced homebrew arcade burger-stacking game for the N64, and my entry for the [very first N64 game jam](https://www.youtube.com/watch?v=10kX9DwDTog).
 
 ## Building
 Needs the N64 developer kit to compile.

@@ -10,7 +10,7 @@ Needs the N64 developer kit to compile.
 First, run `mkdir build` to create a build directory.
 Then, assuming everything is in its standard location, run `build.bat` to build the ROM.
 
-# How to Play
+## How to Play
 The objective of Big Burger is to build the tallest burger you can.
 The game is all about timing.
 When the current ingredient lines up with your burger, press A to slap it into place.
@@ -31,6 +31,6 @@ Can you reach level 1000?
 Most assets in this game are original, but the controller button icons
 came from [Smash Wiki](https://www.ssbwiki.com/Category:Button_icons_(N64)) and are being adapted under the [Attribution-ShareAlike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/) license.
 
-# Special Thanks
+## Special Thanks
 There is absolutely no way I could've gotten anywhere in this project without the help and encouragement from the amazing N64Brew community.
 I have never belonged to such an incredible community before, and I can't wait to see what we can make going forward!

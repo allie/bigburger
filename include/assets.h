@@ -62,5 +62,6 @@
 #include "textures/results_caret.extern.h"
 #include "textures/ingredients.extern.h"
 #include "textures/bracket_offscreen.extern.h"
+#include "textures/heart.extern.h"
 
 #endif

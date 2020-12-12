@@ -40,6 +40,9 @@
 #define SCORE_CENTRE_BONUS 500
 
 #define STARTING_LIVES 3
+#define EXTEND_LIVES 5
+#define EXTEND_LEVEL 500
+#define HEART_SPACING 4
 
 #define SHRINK_ANIM_DURATION 0.05
 #define GROW_ANIM_DURATION 0.1
@@ -105,7 +108,7 @@ static double get_current_speed() {
 
 // Draw the HUD
 static void draw_hud() {
-  int x;
+  int i;
 
   // Set the image colour to white with full alpha
   img_set_colour(255, 255, 255, 255);
@@ -181,14 +184,16 @@ static void draw_hud() {
       break;
   }
 
-  // Draw dpad
-  img_draw(dpad_img, 35, 171);
-
   // Draw A button
   img_draw(a_button_img, 247, 177);
 
   // Draw spatula icon over A button
   img_draw(spatula_img, 253, 168);
+
+  // Draw life count
+  for (i = 0; i < lives; i++) {
+    img_draw(heart_img, SAFE_AREA_H, 104 + i * (heart_img.height + HEART_SPACING));
+  }
 
   // Draw popups
   popup_draw();
@@ -540,6 +545,11 @@ void game_update(double dt) {
       NULL,
       SECONDARY_PART_WINDOW - (SECONDARY_PART_WINDOW * ((part_count) / (MAX_PARTS - 1)))
     );
+
+    // At level 500, grant an extend. It gets a lot harder from here on out!
+    if (part_count + 1 == EXTEND_LEVEL) {
+      lives = EXTEND_LIVES;
+    }
   }
 
   if (controller[0].trigger & B_BUTTON) {

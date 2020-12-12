@@ -61,3 +61,4 @@
 #include "textures/results_caret.h"
 #include "textures/ingredients.h"
 #include "textures/bracket_offscreen.h"
+#include "textures/heart.h"

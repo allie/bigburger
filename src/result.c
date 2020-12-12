@@ -306,14 +306,16 @@ void result_draw() {
     number_draw_0_padded(score, 1, SAFE_AREA_H, 94);
 
     // Draw "RANK" text
-    img_draw(rank_img, SAFE_AREA_H, 128);
+    // img_draw(rank_img, SAFE_AREA_H, 128);
     // Draw rank value
-    img_draw(rank_sss_img, SAFE_AREA_H, 140);
+    // img_draw(rank_sss_img, SAFE_AREA_H, 140);
 
     // Draw "INGREDIENTS" text
-    img_draw(ingredients_img, 157, 163);
+    // img_draw(ingredients_img, 157, 163);
+    img_draw(ingredients_img, SAFE_AREA_H, 142);
     // Draw part count value
-    number_draw_0_padded(part_count, 1, 157, 142);
+    // number_draw_0_padded(part_count, 1, 157, 142);
+    number_draw_0_padded(part_count, 1, SAFE_AREA_H, 154);
   }
 
   // Draw popup images

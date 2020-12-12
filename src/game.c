@@ -523,8 +523,12 @@ void game_update(double dt) {
 
   // Check for a pause button press
   if (controller[0].trigger & START_BUTTON) {
-    // paused = !paused;
-    game_init();
+    paused = !paused;
+    // game_init();
+  }
+  
+  if (paused) {
+    return;
   }
 
   if (bun_placed) {

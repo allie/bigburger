@@ -43,3 +43,4 @@ $(CODESEGMENT):	$(CODEOBJECTS)
 
 $(ROM):	$(CODESEGMENT)
 	$(MAKEROM) spec -I$(NUSYSINC) -r $(ROM) -e $(SYMBOL)
+	makemask $(ROM)

@@ -12,8 +12,8 @@ TARGET = burger
 CODEFILES = $(wildcard $(SRCDIR)/*.c) 
 CODEOBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(CODEFILES:.c=.o)) $(NUOBJ)
 
-DEBUGSYM = -g
-OPTIMIZER = -O0
+DEBUGSYM =
+OPTIMIZER = -O3
 
 NUSYSDIR = $(N64KITDIR)/nusys
 NUSYSINC = $(NUSYSDIR)/include
@@ -26,8 +26,8 @@ NUOBJ = $(NUSYSLIB)/nusys.o
 
 LCDEFS = -DF3DEX_GBI_2
 LCINCS = -I$(INC)/PR -I$(NUSYSINC) -I$(NUSTDINC) -I$(INCDIR) -I$(DATADIR)
-LCOPTS = -G 0 $(DEBUGSYM) -D__DEBUG__
-LDFLAGS = -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) -L$(NUSTDLIB) -lnusys_d -lnustd_d -lgultra_d -L$(GCCDIR)/mipse/lib -lkmc
+LCOPTS = -G 0 $(DEBUGSYM)
+LDFLAGS = -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) -L$(NUSTDLIB) -lnusys -lnustd -lgultra -L$(GCCDIR)/mipse/lib -lkmc
 
 CODESEGMENT = $(OBJDIR)/codesegment.o
 SYMBOL = $(OBJDIR)/$(TARGET).out

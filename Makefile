@@ -7,12 +7,11 @@ INCDIR = include
 OBJDIR = build
 DATADIR = data
 
-TARGET = burger
+TARGET = bigburger
 
 CODEFILES = $(wildcard $(SRCDIR)/*.c) 
 CODEOBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(CODEFILES:.c=.o)) $(NUOBJ)
 
-DEBUGSYM =
 OPTIMIZER = -O3
 
 NUSYSDIR = $(N64KITDIR)/nusys
@@ -26,8 +25,20 @@ NUOBJ = $(NUSYSLIB)/nusys.o
 
 LCDEFS = -DF3DEX_GBI_2
 LCINCS = -I$(INC)/PR -I$(NUSYSINC) -I$(NUSTDINC) -I$(INCDIR) -I$(DATADIR)
-LCOPTS = -G 0 $(DEBUGSYM)
+LCOPTS = -G 0 $(OPTIMIZER)
 LDFLAGS = -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) -L$(NUSTDLIB) -lnusys -lnustd -lgultra -L$(GCCDIR)/mipse/lib -lkmc
+
+# Uncomment for debugging symbols
+# LCOPTS += -g
+
+# Uncomment for debug output in game
+# LCOPTS += -D__DEBUG__
+
+# Uncomment to use debug libraries
+# LDFLAGS = -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -L$(NUSYSLIB) -L$(NUSTDLIB) -lnusys_d -lnustd_d -lgultra_d -L$(GCCDIR)/mipse/lib -lkmc
+
+# Uncomment for PAL mode
+# LCOPTS += -DPAL_MODE
 
 CODESEGMENT = $(OBJDIR)/codesegment.o
 SYMBOL = $(OBJDIR)/$(TARGET).out

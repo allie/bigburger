@@ -32,6 +32,12 @@ static void vsync_callback(int pending) {
 
 void mainproc(void* dummy) {
   nuGfxInit();
+
+#ifdef PAL_MODE
+  osViSetMode(&osViModeTable[OS_VI_FPAL_LAN1]);
+  osViSetYScale(0.833);
+#endif
+
   nuContInit();
 
   InitHeap(heap, sizeof(heap));

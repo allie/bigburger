@@ -7,6 +7,218 @@
 static Animation* animations[MAX_ANIMATIONS];
 static int next_id = 0;
 
+// Preset easing functions
+// Implementations are defined in macros for code integrity, as the same code is executed for each
+// variant of each easing function, but data types differ.
+
+// Linear
+#define ease_linear(time, duration, start, change) \
+	return change * time / duration + start;
+
+static double ease_linear_d(double t, double d, double s, double c) { ease_linear(t, d, s, c) }
+static float ease_linear_f(double t, double d, float s, float c) { ease_linear(t, d, s, c) }
+static int ease_linear_i(double t, double d, int s, int c) { ease_linear(t, d, s, c) }
+
+// Quadratic in
+#define ease_quad_in(time, duration, start, change) \
+	time /= duration; \
+	return change * time * time + start;
+
+static double ease_quad_in_d(double t, double d, double s, double c) { ease_quad_in(t, d, s, c) }
+static float ease_quad_in_f(double t, double d, float s, float c) { ease_quad_in(t, d, s, c) }
+static int ease_quad_in_i(double t, double d, int s, int c) { ease_quad_in(t, d, s, c) }
+
+// Quadratic out
+#define ease_quad_out(time, duration, start, change) \
+	time /= duration; \
+	return -change * time * (time - 2) + start;
+
+static double ease_quad_out_d(double t, double d, double s, double c) { ease_quad_out(t, d, s, c) }
+static float ease_quad_out_f(double t, double d, float s, float c) { ease_quad_out(t, d, s, c) }
+static int ease_quad_out_i(double t, double d, int s, int c) { ease_quad_out(t, d, s, c) }
+
+// Quadratic in/out
+#define ease_quad_in_out(time, duration, start, change) \
+	time /= duration / 2; \
+	if (time < 1) return change / 2 * time * time + start; \
+	time--; \
+	return -change / 2 * (time * (time - 2) - 1) + start;
+
+static double ease_quad_in_out_d(double t, double d, double s, double c) { ease_quad_in_out(t, d, s, c) }
+static float ease_quad_in_out_f(double t, double d, float s, float c) { ease_quad_in_out(t, d, s, c) }
+static int ease_quad_in_out_i(double t, double d, int s, int c) { ease_quad_in_out(t, d, s, c) }
+
+// Cubic in
+#define ease_cubic_in(time, duration, start, change) \
+	time /= duration; \
+	return change * time * time * time + start;
+
+static double ease_cubic_in_d(double t, double d, double s, double c) { ease_cubic_in(t, d, s, c) }
+static float ease_cubic_in_f(double t, double d, float s, float c) { ease_cubic_in(t, d, s, c) }
+static int ease_cubic_in_i(double t, double d, int s, int c) { ease_cubic_in(t, d, s, c) }
+
+// Cubic out
+#define ease_cubic_out(time, duration, start, change) \
+	time /= duration; \
+	time--; \
+	return change * (time * time * time + 1) + start;
+
+static double ease_cubic_out_d(double t, double d, double s, double c) { ease_cubic_out(t, d, s, c) }
+static float ease_cubic_out_f(double t, double d, float s, float c) { ease_cubic_out(t, d, s, c) }
+static int ease_cubic_out_i(double t, double d, int s, int c) { ease_cubic_out(t, d, s, c) }
+
+// Cubic in/out
+#define ease_cubic_in_out(time, duration, start, change) \
+	time /= duration / 2; \
+	if (time < 1) return change / 2 * time * time * time + start; \
+	time -= 2; \
+	return change / 2 * (time * time * time + 2) + start;
+
+static double ease_cubic_in_out_d(double t, double d, double s, double c) { ease_cubic_in_out(t, d, s, c) }
+static float ease_cubic_in_out_f(double t, double d, float s, float c) { ease_cubic_in_out(t, d, s, c) }
+static int ease_cubic_in_out_i(double t, double d, int s, int c) { ease_cubic_in_out(t, d, s, c) }
+
+// Quartic in
+#define ease_quart_in(time, duration, start, change) \
+	time /= duration; \
+	return change * time * time * time * time + start;
+
+static double ease_quart_in_d(double t, double d, double s, double c) { ease_quart_in(t, d, s, c) }
+static float ease_quart_in_f(double t, double d, float s, float c) { ease_quart_in(t, d, s, c) }
+static int ease_quart_in_i(double t, double d, int s, int c) { ease_quart_in(t, d, s, c) }
+
+// Quartic out
+#define ease_quart_out(time, duration, start, change) \
+	time /= duration; \
+	time--; \
+	return -change * (time * time * time * time - 1) + start;
+
+static double ease_quart_out_d(double t, double d, double s, double c) { ease_quart_out(t, d, s, c) }
+static float ease_quart_out_f(double t, double d, float s, float c) { ease_quart_out(t, d, s, c) }
+static int ease_quart_out_i(double t, double d, int s, int c) { ease_quart_out(t, d, s, c) }
+
+// Quartic in/out
+#define ease_quart_in_out(time, duration, start, change) \
+	time /= duration / 2; \
+	if (time < 1) return change / 2 * time * time * time * time + start; \
+	time -= 2; \
+	return -change / 2 * (time * time * time * time - 2) + start;
+
+static double ease_quart_in_out_d(double t, double d, double s, double c) { ease_quart_in_out(t, d, s, c) }
+static float ease_quart_in_out_f(double t, double d, float s, float c) { ease_quart_in_out(t, d, s, c) }
+static int ease_quart_in_out_i(double t, double d, int s, int c) { ease_quart_in_out(t, d, s, c) }
+
+// Quintic in
+#define ease_quint_in(time, duration, start, change) \
+	time /= duration; \
+	return change * time * time * time * time * time + start;
+
+static double ease_quint_in_d(double t, double d, double s, double c) { ease_quint_in(t, d, s, c) }
+static float ease_quint_in_f(double t, double d, float s, float c) { ease_quint_in(t, d, s, c) }
+static int ease_quint_in_i(double t, double d, int s, int c) { ease_quint_in(t, d, s, c) }
+
+// Quintic out
+#define ease_quint_out(time, duration, start, change) \
+	time /= duration; \
+	time--; \
+	return change * (time * time * time * time * time + 1) + start;
+
+static double ease_quint_out_d(double t, double d, double s, double c) { ease_quint_out(t, d, s, c) }
+static float ease_quint_out_f(double t, double d, float s, float c) { ease_quint_out(t, d, s, c) }
+static int ease_quint_out_i(double t, double d, int s, int c) { ease_quint_out(t, d, s, c) }
+
+// Quintic in/out
+#define ease_quint_in_out(time, duration, start, change) \
+	time /= duration / 2; \
+	if (time < 1) return change / 2 * time * time * time * time * time + start; \
+	time -= 2; \
+	return change / 2 * (time * time * time * time * time + 2) + start;
+
+static double ease_quint_in_out_d(double t, double d, double s, double c) { ease_quint_in_out(t, d, s, c) }
+static float ease_quint_in_out_f(double t, double d, float s, float c) { ease_quint_in_out(t, d, s, c) }
+static int ease_quint_in_out_i(double t, double d, int s, int c) { ease_quint_in_out(t, d, s, c) }
+
+// Sinusoidal in
+#define ease_sin_in(time, duration, start, change) \
+	return -change * cos(time / duration * (M_PI / 2)) + change + start;
+
+static double ease_sin_in_d(double t, double d, double s, double c) { ease_sin_in(t, d, s, c) }
+static float ease_sin_in_f(double t, double d, float s, float c) { ease_sin_in(t, d, s, c) }
+static int ease_sin_in_i(double t, double d, int s, int c) { ease_sin_in(t, d, s, c) }
+
+// Sinusoidal out
+#define ease_sin_out(time, duration, start, change) \
+	return change * sin(time / duration * (M_PI / 2)) + start;
+
+static double ease_sin_out_d(double t, double d, double s, double c) { ease_sin_out(t, d, s, c) }
+static float ease_sin_out_f(double t, double d, float s, float c) { ease_sin_out(t, d, s, c) }
+static int ease_sin_out_i(double t, double d, int s, int c) { ease_sin_out(t, d, s, c) }
+
+// Sinusoidal in/out
+#define ease_sin_in_out(time, duration, start, change) \
+	return -change / 2 * (cos(M_PI * time / duration) - 1) + start;
+
+static double ease_sin_in_out_d(double t, double d, double s, double c) { ease_sin_in_out(t, d, s, c) }
+static float ease_sin_in_out_f(double t, double d, float s, float c) { ease_sin_in_out(t, d, s, c) }
+static int ease_sin_in_out_i(double t, double d, int s, int c) { ease_sin_in_out(t, d, s, c) }
+
+// Exponential in
+#define ease_exp_in(time, duration, start, change) \
+	return change * pow(2, 10 * (time / duration - 1)) + start;
+
+static double ease_exp_in_d(double t, double d, double s, double c) { ease_exp_in(t, d, s, c) }
+static float ease_exp_in_f(double t, double d, float s, float c) { ease_exp_in(t, d, s, c) }
+static int ease_exp_in_i(double t, double d, int s, int c) { ease_exp_in(t, d, s, c) }
+
+// Exponential out
+#define ease_exp_out(time, duration, start, change) \
+	return change * (-pow(2, -10 * time / duration) + 1) + start;
+
+static double ease_exp_out_d(double t, double d, double s, double c) { ease_exp_out(t, d, s, c) }
+static float ease_exp_out_f(double t, double d, float s, float c) { ease_exp_out(t, d, s, c) }
+static int ease_exp_out_i(double t, double d, int s, int c) { ease_exp_out(t, d, s, c) }
+
+// Exponential in/out
+#define ease_exp_in_out(time, duration, start, change) \
+	time /= duration  / 2; \
+	if (time < 1) return change / 2 * pow(2, 10 * (time - 1)) + start; \
+	time--; \
+	return change / 2 * (-pow(2, -10 * time) + 2 ) + start;
+
+static double ease_exp_in_out_d(double t, double d, double s, double c) { ease_exp_in_out(t, d, s, c) }
+static float ease_exp_in_out_f(double t, double d, float s, float c) { ease_exp_in_out(t, d, s, c) }
+static int ease_exp_in_out_i(double t, double d, int s, int c) { ease_exp_in_out(t, d, s, c) }
+
+// Circular in
+#define ease_circ_in(time, duration, start, change) \
+	time /= duration; \
+	return -change * (sqrt(1 - time * time) - 1) + start;
+
+static double ease_circ_in_d(double t, double d, double s, double c) { ease_circ_in(t, d, s, c) }
+static float ease_circ_in_f(double t, double d, float s, float c) { ease_circ_in(t, d, s, c) }
+static int ease_circ_in_i(double t, double d, int s, int c) { ease_circ_in(t, d, s, c) }
+
+// Circular out
+#define ease_circ_out(time, duration, start, change) \
+	time /= duration; \
+	time--; \
+	return change * sqrt(1 - time * time) + start;
+
+static double ease_circ_out_d(double t, double d, double s, double c) { ease_circ_out(t, d, s, c) }
+static float ease_circ_out_f(double t, double d, float s, float c) { ease_circ_out(t, d, s, c) }
+static int ease_circ_out_i(double t, double d, int s, int c) { ease_circ_out(t, d, s, c) }
+
+// Circular in/out
+#define ease_circ_in_out(time, duration, start, change) \
+	time /= duration / 2; \
+	if (time < 1) return -change / 2 * (sqrt(1 - time * time) - 1) + start; \
+	time -= 2; \
+	return change / 2 * (sqrt(1 - time * time) + 1) + start;
+
+static double ease_circ_in_out_d(double t, double d, double s, double c) { ease_circ_in_out(t, d, s, c) }
+static float ease_circ_in_out_f(double t, double d, float s, float c) { ease_circ_in_out(t, d, s, c) }
+static int ease_circ_in_out_i(double t, double d, int s, int c) { ease_circ_in_out(t, d, s, c) }
+
 // Get a free animation ID. If -1 is returned, increase MAX_ANIMATIONS
 static int get_free_id() {
 	int i;
@@ -70,7 +282,7 @@ void animation_update(double dt) {
 		for (v = 0; v < anim->value_count; v++) {
 			AnimatedValue* value = &(anim->values[v]);
 			Tween* current_tween;
-			double progress;
+			double elapsed, progress;
 
 			// Determine which tween each animated value is on based on the current time
 			// TODO: optimize this, no need to iterate through every single update.
@@ -83,7 +295,30 @@ void animation_update(double dt) {
 
 			// Update each animated value with the easing function for its current tween
 			current_tween = &(value->tweens[value->current_tween]);
-			progress = (anim->status.elapsed - current_tween->start_time) / current_tween->duration;
+			elapsed = anim->status.elapsed - current_tween->start_time;
+
+			if (elapsed >= current_tween->duration) {
+				switch (value->data_type) {
+					case ANIM_DOUBLE:
+						*(value->ptr.d) = current_tween->end.d;
+						break;
+
+					case ANIM_FLOAT:
+						*(value->ptr.f) = current_tween->end.f;
+						break;
+
+					case ANIM_INT:
+						*(value->ptr.i) = current_tween->end.i;
+						break;
+
+					default:
+						break;
+				}
+				continue;
+			}
+
+			progress = elapsed / current_tween->duration;
+			progress = progress > 1.0 ? 1.0 : progress;
 
 			switch (value->data_type) {
 				case ANIM_DOUBLE: {
@@ -118,6 +353,36 @@ void animation_update(double dt) {
 
 				default:
 					break;
+			}
+		}
+
+		// If this animation finished playing on this update, and it has no more remaining loops,
+		// ensure that all values are set to their final values
+		if (anim->loop_count == 0 && !anim->status.playing) {
+			for (v = 0; v < anim->value_count; v++) {
+				AnimatedValue* value = &(anim->values[v]);
+
+				switch (value->data_type) {
+					case ANIM_DOUBLE:
+						*(value->ptr.d) = value->tweens[value->tween_count - 1].end.d;
+						break;
+
+					case ANIM_FLOAT:
+						*(value->ptr.f) = value->tweens[value->tween_count - 1].end.f;
+						break;
+
+					case ANIM_INT:
+						*(value->ptr.i) = value->tweens[value->tween_count - 1].end.i;
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			// And, if it's set to be destroyed after it finishes playing, destroy it now
+			if (anim->destroy_after) {
+				animation_destroy(a);
 			}
 		}
 	}
@@ -218,6 +483,9 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 					case EASE_CIRC_IN_OUT:
 						anim.tweens[i].easing_func.d = ease_circ_in_out_d;
 						break;
+					case EASE_CUSTOM:
+						anim.tweens[i].easing_func.d = va_arg(v, EasingFuncD);
+						break;
 					default:
 						anim.tweens[i].easing_func.d = ease_linear_d;
 						break;
@@ -303,6 +571,9 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 						break;
 					case EASE_CIRC_IN_OUT:
 						anim.tweens[i].easing_func.f = ease_circ_in_out_f;
+						break;
+					case EASE_CUSTOM:
+						anim.tweens[i].easing_func.f = va_arg(v, EasingFuncF);
 						break;
 					default:
 						anim.tweens[i].easing_func.f = ease_linear_f;
@@ -390,6 +661,9 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 					case EASE_CIRC_IN_OUT:
 						anim.tweens[i].easing_func.i = ease_circ_in_out_i;
 						break;
+					case EASE_CUSTOM:
+						anim.tweens[i].easing_func.i = va_arg(v, EasingFuncI);
+						break;
 					default:
 						anim.tweens[i].easing_func.i = ease_linear_i;
 						break;
@@ -416,7 +690,7 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 }
 
 // Create a new animation
-int animation_create(int loop_count, unsigned int value_count, ...) {
+int animation_create(int loop_count, int destroy_after, unsigned int value_count, ...) {
 	int i = 0;
 	int t = 0;
 	va_list v;
@@ -425,8 +699,9 @@ int animation_create(int loop_count, unsigned int value_count, ...) {
 	assert(id > -1);
 
 	animations[id] = (Animation*)malloc(sizeof(Animation));
-	animations[id]->loop_count = loop_count == 0 ? -1 : loop_count;
+	animations[id]->loop_count = loop_count;
 	animations[id]->value_count = value_count;
+	animations[id]->destroy_after = destroy_after;
 	animations[id]->values = (AnimatedValue*)malloc(sizeof(AnimatedValue) * value_count);
 	animations[id]->status.elapsed = 0;
 	animations[id]->status.playing = 0;
@@ -475,6 +750,18 @@ void animation_destroy(int id) {
 	animations[id] = NULL;
 }
 
+// Destroy all animations
+void animation_destroy_all() {
+	int i;
+
+	for (i = 0; i < MAX_ANIMATIONS; i++) {
+		if (animations[i] == NULL) {
+			continue;
+		}
+		animation_destroy(i);
+	}
+}
+
 void animation_play(int id) {
 	assert(id > -1 && id < MAX_ANIMATIONS);
 
@@ -517,215 +804,3 @@ AnimationStatus animation_status(int id) {
 
 	return animations[id]->status;
 }
-
-// Preset easing functions
-// Implementations are defined in macros for code integrity, as the same code is executed for each
-// variant of each easing function, but data types differ.
-
-// Linear
-#define ease_linear(time, duration, start, change) \
-	return change * time / duration + start;
-
-double ease_linear_d(double t, double d, double s, double c) { ease_linear(t, d, s, c) }
-float ease_linear_f(double t, double d, float s, float c) { ease_linear(t, d, s, c) }
-int ease_linear_i(double t, double d, int s, int c) { ease_linear(t, d, s, c) }
-
-// Quadratic in
-#define ease_quad_in(time, duration, start, change) \
-	time /= duration; \
-	return change * time * time + start;
-
-double ease_quad_in_d(double t, double d, double s, double c) { ease_quad_in(t, d, s, c) }
-float ease_quad_in_f(double t, double d, float s, float c) { ease_quad_in(t, d, s, c) }
-int ease_quad_in_i(double t, double d, int s, int c) { ease_quad_in(t, d, s, c) }
-
-// Quadratic out
-#define ease_quad_out(time, duration, start, change) \
-	time /= duration; \
-	return -change * time * (time - 2) + start;
-
-double ease_quad_out_d(double t, double d, double s, double c) { ease_quad_out(t, d, s, c) }
-float ease_quad_out_f(double t, double d, float s, float c) { ease_quad_out(t, d, s, c) }
-int ease_quad_out_i(double t, double d, int s, int c) { ease_quad_out(t, d, s, c) }
-
-// Quadratic in/out
-#define ease_quad_in_out(time, duration, start, change) \
-	time /= duration / 2; \
-	if (time < 1) return change / 2 * time * time + start; \
-	time--; \
-	return -change / 2 * (time * (time - 2) - 1) + start;
-
-double ease_quad_in_out_d(double t, double d, double s, double c) { ease_quad_in_out(t, d, s, c) }
-float ease_quad_in_out_f(double t, double d, float s, float c) { ease_quad_in_out(t, d, s, c) }
-int ease_quad_in_out_i(double t, double d, int s, int c) { ease_quad_in_out(t, d, s, c) }
-
-// Cubic in
-#define ease_cubic_in(time, duration, start, change) \
-	time /= duration; \
-	return change * time * time * time + start;
-
-double ease_cubic_in_d(double t, double d, double s, double c) { ease_cubic_in(t, d, s, c) }
-float ease_cubic_in_f(double t, double d, float s, float c) { ease_cubic_in(t, d, s, c) }
-int ease_cubic_in_i(double t, double d, int s, int c) { ease_cubic_in(t, d, s, c) }
-
-// Cubic out
-#define ease_cubic_out(time, duration, start, change) \
-	time /= duration; \
-	time--; \
-	return change * (time * time * time + 1) + start;
-
-double ease_cubic_out_d(double t, double d, double s, double c) { ease_cubic_out(t, d, s, c) }
-float ease_cubic_out_f(double t, double d, float s, float c) { ease_cubic_out(t, d, s, c) }
-int ease_cubic_out_i(double t, double d, int s, int c) { ease_cubic_out(t, d, s, c) }
-
-// Cubic in/out
-#define ease_cubic_in_out(time, duration, start, change) \
-	time /= duration / 2; \
-	if (time < 1) return change / 2 * time * time * time + start; \
-	time -= 2; \
-	return change / 2 * (time * time * time + 2) + start;
-
-double ease_cubic_in_out_d(double t, double d, double s, double c) { ease_cubic_in_out(t, d, s, c) }
-float ease_cubic_in_out_f(double t, double d, float s, float c) { ease_cubic_in_out(t, d, s, c) }
-int ease_cubic_in_out_i(double t, double d, int s, int c) { ease_cubic_in_out(t, d, s, c) }
-
-// Quartic in
-#define ease_quart_in(time, duration, start, change) \
-	time /= duration; \
-	return change * time * time * time * time + start;
-
-double ease_quart_in_d(double t, double d, double s, double c) { ease_quart_in(t, d, s, c) }
-float ease_quart_in_f(double t, double d, float s, float c) { ease_quart_in(t, d, s, c) }
-int ease_quart_in_i(double t, double d, int s, int c) { ease_quart_in(t, d, s, c) }
-
-// Quartic out
-#define ease_quart_out(time, duration, start, change) \
-	time /= duration; \
-	time--; \
-	return -change * (time * time * time * time - 1) + start;
-
-double ease_quart_out_d(double t, double d, double s, double c) { ease_quart_out(t, d, s, c) }
-float ease_quart_out_f(double t, double d, float s, float c) { ease_quart_out(t, d, s, c) }
-int ease_quart_out_i(double t, double d, int s, int c) { ease_quart_out(t, d, s, c) }
-
-// Quartic in/out
-#define ease_quart_in_out(time, duration, start, change) \
-	time /= duration / 2; \
-	if (time < 1) return change / 2 * time * time * time * time + start; \
-	time -= 2; \
-	return -change / 2 * (time * time * time * time - 2) + start;
-
-double ease_quart_in_out_d(double t, double d, double s, double c) { ease_quart_in_out(t, d, s, c) }
-float ease_quart_in_out_f(double t, double d, float s, float c) { ease_quart_in_out(t, d, s, c) }
-int ease_quart_in_out_i(double t, double d, int s, int c) { ease_quart_in_out(t, d, s, c) }
-
-// Quintic in
-#define ease_quint_in(time, duration, start, change) \
-	time /= duration; \
-	return change * time * time * time * time * time + start;
-
-double ease_quint_in_d(double t, double d, double s, double c) { ease_quint_in(t, d, s, c) }
-float ease_quint_in_f(double t, double d, float s, float c) { ease_quint_in(t, d, s, c) }
-int ease_quint_in_i(double t, double d, int s, int c) { ease_quint_in(t, d, s, c) }
-
-// Quintic out
-#define ease_quint_out(time, duration, start, change) \
-	time /= duration; \
-	time--; \
-	return change * (time * time * time * time * time + 1) + start;
-
-double ease_quint_out_d(double t, double d, double s, double c) { ease_quint_out(t, d, s, c) }
-float ease_quint_out_f(double t, double d, float s, float c) { ease_quint_out(t, d, s, c) }
-int ease_quint_out_i(double t, double d, int s, int c) { ease_quint_out(t, d, s, c) }
-
-// Quintic in/out
-#define ease_quint_in_out(time, duration, start, change) \
-	time /= duration / 2; \
-	if (time < 1) return change / 2 * time * time * time * time * time + start; \
-	time -= 2; \
-	return change / 2 * (time * time * time * time * time + 2) + start;
-
-double ease_quint_in_out_d(double t, double d, double s, double c) { ease_quint_in_out(t, d, s, c) }
-float ease_quint_in_out_f(double t, double d, float s, float c) { ease_quint_in_out(t, d, s, c) }
-int ease_quint_in_out_i(double t, double d, int s, int c) { ease_quint_in_out(t, d, s, c) }
-
-// Sinusoidal in
-#define ease_sin_in(time, duration, start, change) \
-	return -change * cos(time / duration * (M_PI / 2)) + change + start;
-
-double ease_sin_in_d(double t, double d, double s, double c) { ease_sin_in(t, d, s, c) }
-float ease_sin_in_f(double t, double d, float s, float c) { ease_sin_in(t, d, s, c) }
-int ease_sin_in_i(double t, double d, int s, int c) { ease_sin_in(t, d, s, c) }
-
-// Sinusoidal out
-#define ease_sin_out(time, duration, start, change) \
-	return change * sin(time / duration * (M_PI / 2)) + start;
-
-double ease_sin_out_d(double t, double d, double s, double c) { ease_sin_out(t, d, s, c) }
-float ease_sin_out_f(double t, double d, float s, float c) { ease_sin_out(t, d, s, c) }
-int ease_sin_out_i(double t, double d, int s, int c) { ease_sin_out(t, d, s, c) }
-
-// Sinusoidal in/out
-#define ease_sin_in_out(time, duration, start, change) \
-	return -change / 2 * (cos(M_PI * time / duration) - 1) + start;
-
-double ease_sin_in_out_d(double t, double d, double s, double c) { ease_sin_in_out(t, d, s, c) }
-float ease_sin_in_out_f(double t, double d, float s, float c) { ease_sin_in_out(t, d, s, c) }
-int ease_sin_in_out_i(double t, double d, int s, int c) { ease_sin_in_out(t, d, s, c) }
-
-// Exponential in
-#define ease_exp_in(time, duration, start, change) \
-	return change * pow(2, 10 * (time / duration - 1)) + start;
-
-double ease_exp_in_d(double t, double d, double s, double c) { ease_exp_in(t, d, s, c) }
-float ease_exp_in_f(double t, double d, float s, float c) { ease_exp_in(t, d, s, c) }
-int ease_exp_in_i(double t, double d, int s, int c) { ease_exp_in(t, d, s, c) }
-
-// Exponential out
-#define ease_exp_out(time, duration, start, change) \
-	return change * (-pow(2, -10 * time / duration) + 1) + start;
-
-double ease_exp_out_d(double t, double d, double s, double c) { ease_exp_out(t, d, s, c) }
-float ease_exp_out_f(double t, double d, float s, float c) { ease_exp_out(t, d, s, c) }
-int ease_exp_out_i(double t, double d, int s, int c) { ease_exp_out(t, d, s, c) }
-
-// Exponential in/out
-#define ease_exp_in_out(time, duration, start, change) \
-	time /= duration  / 2; \
-	if (time < 1) return change / 2 * pow(2, 10 * (time - 1)) + start; \
-	time--; \
-	return change / 2 * (-pow(2, -10 * time) + 2 ) + start;
-
-double ease_exp_in_out_d(double t, double d, double s, double c) { ease_exp_in_out(t, d, s, c) }
-float ease_exp_in_out_f(double t, double d, float s, float c) { ease_exp_in_out(t, d, s, c) }
-int ease_exp_in_out_i(double t, double d, int s, int c) { ease_exp_in_out(t, d, s, c) }
-
-// Circular in
-#define ease_circ_in(time, duration, start, change) \
-	time /= duration; \
-	return -change * (sqrt(1 - time * time) - 1) + start;
-
-double ease_circ_in_d(double t, double d, double s, double c) { ease_circ_in(t, d, s, c) }
-float ease_circ_in_f(double t, double d, float s, float c) { ease_circ_in(t, d, s, c) }
-int ease_circ_in_i(double t, double d, int s, int c) { ease_circ_in(t, d, s, c) }
-
-// Circular out
-#define ease_circ_out(time, duration, start, change) \
-	time /= duration; \
-	time--; \
-	return change * sqrt(1 - time * time) + start;
-
-double ease_circ_out_d(double t, double d, double s, double c) { ease_circ_out(t, d, s, c) }
-float ease_circ_out_f(double t, double d, float s, float c) { ease_circ_out(t, d, s, c) }
-int ease_circ_out_i(double t, double d, int s, int c) { ease_circ_out(t, d, s, c) }
-
-// Circular in/out
-#define ease_circ_in_out(time, duration, start, change) \
-	time /= duration / 2; \
-	if (time < 1) return -change / 2 * (sqrt(1 - time * time) - 1) + start; \
-	time -= 2; \
-	return change / 2 * (sqrt(1 - time * time) + 1) + start;
-
-double ease_circ_in_out_d(double t, double d, double s, double c) { ease_circ_in_out(t, d, s, c) }
-float ease_circ_in_out_f(double t, double d, float s, float c) { ease_circ_in_out(t, d, s, c) }
-int ease_circ_in_out_i(double t, double d, int s, int c) { ease_circ_in_out(t, d, s, c) }

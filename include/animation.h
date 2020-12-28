@@ -4,14 +4,14 @@
 #define MAX_ANIMATIONS 100
 
 // Data types of values that can be animated
-enum {
+enum AnimDataType {
   ANIM_DOUBLE,
   ANIM_FLOAT,
   ANIM_INT
 };
 
 // Easing function types
-enum {
+enum EasingFuncType {
   EASE_LINEAR,
   EASE_QUAD_IN,
   EASE_QUAD_OUT,
@@ -87,6 +87,7 @@ typedef struct {
 typedef struct {
   int loop_count;
   unsigned int value_count;
+  int destroy_after;
   AnimationStatus status;
   AnimatedValue* values;
 } Animation;
@@ -97,17 +98,85 @@ void animation_init();
 // Update all animations managed by the system
 void animation_update(double dt);
 
-// Initialize an animated value structure
-// Only should be used within animation_create calls, you shouldn't ever need to directly
-// initialize and work with an AnimatedValue structure.
+/*
+Initialize an animated value structure.
+
+Only should be used within animation_create calls, you shouldn't ever need to directly
+initialize and work with an AnimatedValue structure.
+
+Parameters:
+
+tween_count:      Number of tweens in the timeline
+data_type:        The data type to be animated. See AnimDataType enum for possible values
+
+The first variadic argument should be a pointer to the value to be animated.
+Following that, data for each tween should be specified in this format:
+
+duration, start_val, end_val, easing_func_type, [easing_func_ptr,]
+
+duration:         The length of time this tween should span
+start_val:        The starting value for this tween
+end_val:          The ending value for this tween
+easing_func_type: The type of easing function to use. See EasingFuncType enum for possible values.
+easing_func_ptr:  This argument should be omitted unless using EASE_CUSTOM, in which case you should
+                  pass a pointer to your custom easing function. Custom easing functions should be of
+                  the following form:
+                  T my_easing_func(double time, double duration, T start, T change)
+                  where T is the same data type as the value that is being animated.
+
+Example:
+
+animate_value(
+  2, ANIM_DOUBLE, &x,
+  0.5, 0.0, 100.0, EASE_QUAD_IN_OUT,
+  0.5, 100.0, 0.0, EASE_QUAD_IN_OUT
+);
+
+This animate_value call would set up an AnimatedValue pointing to a double value called x
+with 2 tweens. The total duration would be 1 second, and the value would go from 0.0 to 100.0
+and back, with quadratic easing in and out for each tween.
+*/
 AnimatedValue animate_value(unsigned int tween_count, int data_type, ...);
 
-// Create a new animation consisting of one or more animated values
-// Animations are automatically updated internally
-int animation_create(int loop_count, unsigned int value_count, ...);
+/*
+Create a new animation consisting of one or more animated values.
+Animations are automatically updated internally.
+
+Parameters:
+
+loop_count:       Number of times this animation should be repeated. Pass -1 for an infinite loop
+destroy_after:    Whether or not this animation should be destroyed after it is finished playing
+value_count:      Number of values being animated in this animation
+
+Arguments should be followed by AnimatedValues created by calling animate_value.
+
+Example:
+
+int anim = animation_create(
+  0, 1, 2,
+  animate_value(
+    2, ANIM_DOUBLE, &x,
+    0.5, 0.0, 100.0, EASE_QUAD_IN_OUT,
+    0.5, 100.0, 0.0, EASE_QUAD_IN_OUT
+  ),
+  animate_value(
+    2, ANIM_DOUBLE, &y,
+    0.5, 100.0, 0.0, EASE_QUAD_IN_OUT,
+    0.5, 0.0, 100.0, EASE_QUAD_IN_OUT
+  )
+);
+
+This animation_create call would add an animation to the system which animates two double values
+called x and y. The point would animate from (0.0, 100.0) to (100.0, 0.0) and back over a duration of
+1 second. Each tween uses quadratic easing in and out.
+*/
+int animation_create(int loop_count, int destroy_after, unsigned int value_count, ...);
 
 // Destroy an animation, freeing all its allocating memory and freeing up an animation slot
 void animation_destroy(int id);
+
+// Destroy all animations within the system
+void animation_destroy_all();
 
 // Command an animation to play by its ID
 void animation_play(int id);
@@ -120,95 +189,5 @@ void animation_stop(int id);
 
 // Get a copy of an animation's status structure
 AnimationStatus animation_status(int id);
-
-// Preset easing functions
-// Linear
-double ease_linear_d(double time, double duration, double start, double change);
-float ease_linear_f(double time, double duration, float start, float change);
-int ease_linear_i(double time, double duration, int start, int change);
-// Quadratic in
-double ease_quad_in_d(double time, double duration, double start, double change);
-float ease_quad_in_f(double time, double duration, float start, float change);
-int ease_quad_in_i(double time, double duration, int start, int change);
-// Quadratic out
-double ease_quad_out_d(double time, double duration, double start, double change);
-float ease_quad_out_f(double time, double duration, float start, float change);
-int ease_quad_out_i(double time, double duration, int start, int change);
-// Quadratic in/out
-double ease_quad_in_out_d(double time, double duration, double start, double change);
-float ease_quad_in_out_f(double time, double duration, float start, float change);
-int ease_quad_in_out_i(double time, double duration, int start, int change);
-// Cubic in
-double ease_cubic_in_d(double time, double duration, double start, double change);
-float ease_cubic_in_f(double time, double duration, float start, float change);
-int ease_cubic_in_i(double time, double duration, int start, int change);
-// Cubic out
-double ease_cubic_out_d(double time, double duration, double start, double change);
-float ease_cubic_out_f(double time, double duration, float start, float change);
-int ease_cubic_out_i(double time, double duration, int start, int change);
-// Cubic in/out
-double ease_cubic_in_out_d(double time, double duration, double start, double change);
-float ease_cubic_in_out_f(double time, double duration, float start, float change);
-int ease_cubic_in_out_i(double time, double duration, int start, int change);
-// Quartic in
-double ease_quart_in_d(double time, double duration, double start, double change);
-float ease_quart_in_f(double time, double duration, float start, float change);
-int ease_quart_in_i(double time, double duration, int start, int change);
-// Quartic out
-double ease_quart_out_d(double time, double duration, double start, double change);
-float ease_quart_out_f(double time, double duration, float start, float change);
-int ease_quart_out_i(double time, double duration, int start, int change);
-// Quartic in/out
-double ease_quart_in_out_d(double time, double duration, double start, double change);
-float ease_quart_in_out_f(double time, double duration, float start, float change);
-int ease_quart_in_out_i(double time, double duration, int start, int change);
-// Quintic in
-double ease_quint_in_d(double time, double duration, double start, double change);
-float ease_quint_in_f(double time, double duration, float start, float change);
-int ease_quint_in_i(double time, double duration, int start, int change);
-// Quintic out
-double ease_quint_out_d(double time, double duration, double start, double change);
-float ease_quint_out_f(double time, double duration, float start, float change);
-int ease_quint_out_i(double time, double duration, int start, int change);
-// Quintic in/out
-double ease_quint_in_out_d(double time, double duration, double start, double change);
-float ease_quint_in_out_f(double time, double duration, float start, float change);
-int ease_quint_in_out_i(double time, double duration, int start, int change);
-// Sinusoidal in
-double ease_sin_in_d(double time, double duration, double start, double change);
-float ease_sin_in_f(double time, double duration, float start, float change);
-int ease_sin_in_i(double time, double duration, int start, int change);
-// Sinusoidal out
-double ease_sin_out_d(double time, double duration, double start, double change);
-float ease_sin_out_f(double time, double duration, float start, float change);
-int ease_sin_out_i(double time, double duration, int start, int change);
-// Sinusoidal in/out
-double ease_sin_in_out_d(double time, double duration, double start, double change);
-float ease_sin_in_out_f(double time, double duration, float start, float change);
-int ease_sin_in_out_i(double time, double duration, int start, int change);
-// Exponential in
-double ease_exp_in_d(double time, double duration, double start, double change);
-float ease_exp_in_f(double time, double duration, float start, float change);
-int ease_exp_in_i(double time, double duration, int start, int change);
-// Exponential out
-double ease_exp_out_d(double time, double duration, double start, double change);
-float ease_exp_out_f(double time, double duration, float start, float change);
-int ease_exp_out_i(double time, double duration, int start, int change);
-// Exponential in/out
-double ease_exp_in_out_d(double time, double duration, double start, double change);
-float ease_exp_in_out_f(double time, double duration, float start, float change);
-int ease_exp_in_out_i(double time, double duration, int start, int change);
-// Circular in
-double ease_circ_in_d(double time, double duration, double start, double change);
-float ease_circ_in_f(double time, double duration, float start, float change);
-int ease_circ_in_i(double time, double duration, int start, int change);
-// Circular out
-double ease_circ_out_d(double time, double duration, double start, double change);
-float ease_circ_out_f(double time, double duration, float start, float change);
-int ease_circ_out_i(double time, double duration, int start, int change);
-// Circular in/out
-double ease_circ_in_out_d(double time, double duration, double start, double change);
-float ease_circ_in_out_f(double time, double duration, float start, float change);
-int ease_circ_in_out_i(double time, double duration, int start, int change);
 
 #endif

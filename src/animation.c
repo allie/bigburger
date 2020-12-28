@@ -11,31 +11,32 @@ static int next_id = 0;
 // Implementations are defined in macros for code integrity, as the same code is executed for each
 // variant of each easing function, but data types differ.
 
+// Generates easing function definitions, to make adding new easing functions much quicker
+#define gen_ease_func(name) \
+	static double ease_##name##_f64(double t, double d, double s, double c) { ease_##name(t, d, s, c) } \
+	static float ease_##name##_f32(double t, double d, float s, float c) { ease_##name(t, d, s, c) } \
+	static int ease_##name##_s32(double t, double d, int s, int c) { ease_##name(t, d, s, c) } \
+	static long long ease_##name##_s64(double t, double d, long long s, long long c) { ease_##name(t, d, s, c) }
+
 // Linear
 #define ease_linear(time, duration, start, change) \
 	return change * time / duration + start;
 
-static double ease_linear_d(double t, double d, double s, double c) { ease_linear(t, d, s, c) }
-static float ease_linear_f(double t, double d, float s, float c) { ease_linear(t, d, s, c) }
-static int ease_linear_i(double t, double d, int s, int c) { ease_linear(t, d, s, c) }
+gen_ease_func(linear);
 
 // Quadratic in
 #define ease_quad_in(time, duration, start, change) \
 	time /= duration; \
 	return change * time * time + start;
 
-static double ease_quad_in_d(double t, double d, double s, double c) { ease_quad_in(t, d, s, c) }
-static float ease_quad_in_f(double t, double d, float s, float c) { ease_quad_in(t, d, s, c) }
-static int ease_quad_in_i(double t, double d, int s, int c) { ease_quad_in(t, d, s, c) }
+gen_ease_func(quad_in);
 
 // Quadratic out
 #define ease_quad_out(time, duration, start, change) \
 	time /= duration; \
 	return -change * time * (time - 2) + start;
 
-static double ease_quad_out_d(double t, double d, double s, double c) { ease_quad_out(t, d, s, c) }
-static float ease_quad_out_f(double t, double d, float s, float c) { ease_quad_out(t, d, s, c) }
-static int ease_quad_out_i(double t, double d, int s, int c) { ease_quad_out(t, d, s, c) }
+gen_ease_func(quad_out);
 
 // Quadratic in/out
 #define ease_quad_in_out(time, duration, start, change) \
@@ -44,18 +45,14 @@ static int ease_quad_out_i(double t, double d, int s, int c) { ease_quad_out(t, 
 	time--; \
 	return -change / 2 * (time * (time - 2) - 1) + start;
 
-static double ease_quad_in_out_d(double t, double d, double s, double c) { ease_quad_in_out(t, d, s, c) }
-static float ease_quad_in_out_f(double t, double d, float s, float c) { ease_quad_in_out(t, d, s, c) }
-static int ease_quad_in_out_i(double t, double d, int s, int c) { ease_quad_in_out(t, d, s, c) }
+gen_ease_func(quad_in_out);
 
 // Cubic in
 #define ease_cubic_in(time, duration, start, change) \
 	time /= duration; \
 	return change * time * time * time + start;
 
-static double ease_cubic_in_d(double t, double d, double s, double c) { ease_cubic_in(t, d, s, c) }
-static float ease_cubic_in_f(double t, double d, float s, float c) { ease_cubic_in(t, d, s, c) }
-static int ease_cubic_in_i(double t, double d, int s, int c) { ease_cubic_in(t, d, s, c) }
+gen_ease_func(cubic_in);
 
 // Cubic out
 #define ease_cubic_out(time, duration, start, change) \
@@ -63,9 +60,7 @@ static int ease_cubic_in_i(double t, double d, int s, int c) { ease_cubic_in(t, 
 	time--; \
 	return change * (time * time * time + 1) + start;
 
-static double ease_cubic_out_d(double t, double d, double s, double c) { ease_cubic_out(t, d, s, c) }
-static float ease_cubic_out_f(double t, double d, float s, float c) { ease_cubic_out(t, d, s, c) }
-static int ease_cubic_out_i(double t, double d, int s, int c) { ease_cubic_out(t, d, s, c) }
+gen_ease_func(cubic_out);
 
 // Cubic in/out
 #define ease_cubic_in_out(time, duration, start, change) \
@@ -74,18 +69,14 @@ static int ease_cubic_out_i(double t, double d, int s, int c) { ease_cubic_out(t
 	time -= 2; \
 	return change / 2 * (time * time * time + 2) + start;
 
-static double ease_cubic_in_out_d(double t, double d, double s, double c) { ease_cubic_in_out(t, d, s, c) }
-static float ease_cubic_in_out_f(double t, double d, float s, float c) { ease_cubic_in_out(t, d, s, c) }
-static int ease_cubic_in_out_i(double t, double d, int s, int c) { ease_cubic_in_out(t, d, s, c) }
+gen_ease_func(cubic_in_out);
 
 // Quartic in
 #define ease_quart_in(time, duration, start, change) \
 	time /= duration; \
 	return change * time * time * time * time + start;
 
-static double ease_quart_in_d(double t, double d, double s, double c) { ease_quart_in(t, d, s, c) }
-static float ease_quart_in_f(double t, double d, float s, float c) { ease_quart_in(t, d, s, c) }
-static int ease_quart_in_i(double t, double d, int s, int c) { ease_quart_in(t, d, s, c) }
+gen_ease_func(quart_in);
 
 // Quartic out
 #define ease_quart_out(time, duration, start, change) \
@@ -93,9 +84,7 @@ static int ease_quart_in_i(double t, double d, int s, int c) { ease_quart_in(t, 
 	time--; \
 	return -change * (time * time * time * time - 1) + start;
 
-static double ease_quart_out_d(double t, double d, double s, double c) { ease_quart_out(t, d, s, c) }
-static float ease_quart_out_f(double t, double d, float s, float c) { ease_quart_out(t, d, s, c) }
-static int ease_quart_out_i(double t, double d, int s, int c) { ease_quart_out(t, d, s, c) }
+gen_ease_func(quart_out);
 
 // Quartic in/out
 #define ease_quart_in_out(time, duration, start, change) \
@@ -104,18 +93,14 @@ static int ease_quart_out_i(double t, double d, int s, int c) { ease_quart_out(t
 	time -= 2; \
 	return -change / 2 * (time * time * time * time - 2) + start;
 
-static double ease_quart_in_out_d(double t, double d, double s, double c) { ease_quart_in_out(t, d, s, c) }
-static float ease_quart_in_out_f(double t, double d, float s, float c) { ease_quart_in_out(t, d, s, c) }
-static int ease_quart_in_out_i(double t, double d, int s, int c) { ease_quart_in_out(t, d, s, c) }
+gen_ease_func(quart_in_out);
 
 // Quintic in
 #define ease_quint_in(time, duration, start, change) \
 	time /= duration; \
 	return change * time * time * time * time * time + start;
 
-static double ease_quint_in_d(double t, double d, double s, double c) { ease_quint_in(t, d, s, c) }
-static float ease_quint_in_f(double t, double d, float s, float c) { ease_quint_in(t, d, s, c) }
-static int ease_quint_in_i(double t, double d, int s, int c) { ease_quint_in(t, d, s, c) }
+gen_ease_func(quint_in);
 
 // Quintic out
 #define ease_quint_out(time, duration, start, change) \
@@ -123,9 +108,7 @@ static int ease_quint_in_i(double t, double d, int s, int c) { ease_quint_in(t, 
 	time--; \
 	return change * (time * time * time * time * time + 1) + start;
 
-static double ease_quint_out_d(double t, double d, double s, double c) { ease_quint_out(t, d, s, c) }
-static float ease_quint_out_f(double t, double d, float s, float c) { ease_quint_out(t, d, s, c) }
-static int ease_quint_out_i(double t, double d, int s, int c) { ease_quint_out(t, d, s, c) }
+gen_ease_func(quint_out);
 
 // Quintic in/out
 #define ease_quint_in_out(time, duration, start, change) \
@@ -134,49 +117,37 @@ static int ease_quint_out_i(double t, double d, int s, int c) { ease_quint_out(t
 	time -= 2; \
 	return change / 2 * (time * time * time * time * time + 2) + start;
 
-static double ease_quint_in_out_d(double t, double d, double s, double c) { ease_quint_in_out(t, d, s, c) }
-static float ease_quint_in_out_f(double t, double d, float s, float c) { ease_quint_in_out(t, d, s, c) }
-static int ease_quint_in_out_i(double t, double d, int s, int c) { ease_quint_in_out(t, d, s, c) }
+gen_ease_func(quint_in_out);
 
 // Sinusoidal in
 #define ease_sin_in(time, duration, start, change) \
 	return -change * cos(time / duration * (M_PI / 2)) + change + start;
 
-static double ease_sin_in_d(double t, double d, double s, double c) { ease_sin_in(t, d, s, c) }
-static float ease_sin_in_f(double t, double d, float s, float c) { ease_sin_in(t, d, s, c) }
-static int ease_sin_in_i(double t, double d, int s, int c) { ease_sin_in(t, d, s, c) }
+gen_ease_func(sin_in);
 
 // Sinusoidal out
 #define ease_sin_out(time, duration, start, change) \
 	return change * sin(time / duration * (M_PI / 2)) + start;
 
-static double ease_sin_out_d(double t, double d, double s, double c) { ease_sin_out(t, d, s, c) }
-static float ease_sin_out_f(double t, double d, float s, float c) { ease_sin_out(t, d, s, c) }
-static int ease_sin_out_i(double t, double d, int s, int c) { ease_sin_out(t, d, s, c) }
+gen_ease_func(sin_out);
 
 // Sinusoidal in/out
 #define ease_sin_in_out(time, duration, start, change) \
 	return -change / 2 * (cos(M_PI * time / duration) - 1) + start;
 
-static double ease_sin_in_out_d(double t, double d, double s, double c) { ease_sin_in_out(t, d, s, c) }
-static float ease_sin_in_out_f(double t, double d, float s, float c) { ease_sin_in_out(t, d, s, c) }
-static int ease_sin_in_out_i(double t, double d, int s, int c) { ease_sin_in_out(t, d, s, c) }
+gen_ease_func(sin_in_out);
 
 // Exponential in
 #define ease_exp_in(time, duration, start, change) \
 	return change * pow(2, 10 * (time / duration - 1)) + start;
 
-static double ease_exp_in_d(double t, double d, double s, double c) { ease_exp_in(t, d, s, c) }
-static float ease_exp_in_f(double t, double d, float s, float c) { ease_exp_in(t, d, s, c) }
-static int ease_exp_in_i(double t, double d, int s, int c) { ease_exp_in(t, d, s, c) }
+gen_ease_func(exp_in);
 
 // Exponential out
 #define ease_exp_out(time, duration, start, change) \
 	return change * (-pow(2, -10 * time / duration) + 1) + start;
 
-static double ease_exp_out_d(double t, double d, double s, double c) { ease_exp_out(t, d, s, c) }
-static float ease_exp_out_f(double t, double d, float s, float c) { ease_exp_out(t, d, s, c) }
-static int ease_exp_out_i(double t, double d, int s, int c) { ease_exp_out(t, d, s, c) }
+gen_ease_func(exp_out);
 
 // Exponential in/out
 #define ease_exp_in_out(time, duration, start, change) \
@@ -185,18 +156,14 @@ static int ease_exp_out_i(double t, double d, int s, int c) { ease_exp_out(t, d,
 	time--; \
 	return change / 2 * (-pow(2, -10 * time) + 2 ) + start;
 
-static double ease_exp_in_out_d(double t, double d, double s, double c) { ease_exp_in_out(t, d, s, c) }
-static float ease_exp_in_out_f(double t, double d, float s, float c) { ease_exp_in_out(t, d, s, c) }
-static int ease_exp_in_out_i(double t, double d, int s, int c) { ease_exp_in_out(t, d, s, c) }
+gen_ease_func(exp_in_out);
 
 // Circular in
 #define ease_circ_in(time, duration, start, change) \
 	time /= duration; \
 	return -change * (sqrt(1 - time * time) - 1) + start;
 
-static double ease_circ_in_d(double t, double d, double s, double c) { ease_circ_in(t, d, s, c) }
-static float ease_circ_in_f(double t, double d, float s, float c) { ease_circ_in(t, d, s, c) }
-static int ease_circ_in_i(double t, double d, int s, int c) { ease_circ_in(t, d, s, c) }
+gen_ease_func(circ_in);
 
 // Circular out
 #define ease_circ_out(time, duration, start, change) \
@@ -204,9 +171,7 @@ static int ease_circ_in_i(double t, double d, int s, int c) { ease_circ_in(t, d,
 	time--; \
 	return change * sqrt(1 - time * time) + start;
 
-static double ease_circ_out_d(double t, double d, double s, double c) { ease_circ_out(t, d, s, c) }
-static float ease_circ_out_f(double t, double d, float s, float c) { ease_circ_out(t, d, s, c) }
-static int ease_circ_out_i(double t, double d, int s, int c) { ease_circ_out(t, d, s, c) }
+gen_ease_func(circ_out);
 
 // Circular in/out
 #define ease_circ_in_out(time, duration, start, change) \
@@ -215,9 +180,7 @@ static int ease_circ_out_i(double t, double d, int s, int c) { ease_circ_out(t, 
 	time -= 2; \
 	return change / 2 * (sqrt(1 - time * time) + 1) + start;
 
-static double ease_circ_in_out_d(double t, double d, double s, double c) { ease_circ_in_out(t, d, s, c) }
-static float ease_circ_in_out_f(double t, double d, float s, float c) { ease_circ_in_out(t, d, s, c) }
-static int ease_circ_in_out_i(double t, double d, int s, int c) { ease_circ_in_out(t, d, s, c) }
+gen_ease_func(circ_in_out);
 
 // Get a free animation ID. If -1 is returned, increase MAX_ANIMATIONS
 static int get_free_id() {
@@ -311,6 +274,10 @@ void animation_update(double dt) {
 						*(value->ptr._s32) = current_tween->end._s32;
 						break;
 
+					case ANIM_S64:
+						*(value->ptr._s64) = current_tween->end._s64;
+						break;
+
 					default:
 						break;
 				}
@@ -351,6 +318,16 @@ void animation_update(double dt) {
 					break;
 				}
 
+				case ANIM_S64: {
+					*(value->ptr._s64) = current_tween->easing_func._s64(
+						anim->status.elapsed - current_tween->start_time,
+						current_tween->duration,
+						current_tween->start._s64,
+						current_tween->end._s64 - current_tween->start._s64
+					);
+					break;
+				}
+
 				default:
 					break;
 			}
@@ -373,6 +350,10 @@ void animation_update(double dt) {
 
 					case ANIM_S32:
 						*(value->ptr._s32) = value->tweens[value->tween_count - 1].end._s32;
+						break;
+
+					case ANIM_S64:
+						*(value->ptr._s64) = value->tweens[value->tween_count - 1].end._s64;
 						break;
 
 					default:
@@ -404,6 +385,32 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 
 	va_start(v, data_type);
 
+// Macro for handling preset easing function cases when setting the easing function, to avoid redudant and tedious code
+#define preset_easing_func_cases(suffix) \
+	case EASE_LINEAR: anim.tweens[i].easing_func._##suffix = ease_linear_##suffix; break; \
+	case EASE_QUAD_IN: anim.tweens[i].easing_func._##suffix = ease_quad_in_##suffix; break; \
+	case EASE_QUAD_OUT: anim.tweens[i].easing_func._##suffix = ease_quad_out_##suffix; break; \
+	case EASE_QUAD_IN_OUT: anim.tweens[i].easing_func._##suffix = ease_quad_in_out_##suffix; break; \
+	case EASE_CUBIC_IN: anim.tweens[i].easing_func._##suffix = ease_cubic_in_##suffix; break; \
+	case EASE_CUBIC_OUT: anim.tweens[i].easing_func._##suffix = ease_cubic_out_##suffix; break; \
+	case EASE_CUBIC_IN_OUT: anim.tweens[i].easing_func._##suffix = ease_cubic_in_out_##suffix; break; \
+	case EASE_QUART_IN: anim.tweens[i].easing_func._##suffix = ease_quart_in_##suffix; break; \
+	case EASE_QUART_OUT: anim.tweens[i].easing_func._##suffix = ease_quart_out_##suffix; break; \
+	case EASE_QUART_IN_OUT: anim.tweens[i].easing_func._##suffix = ease_quart_in_out_##suffix; break; \
+	case EASE_QUINT_IN: anim.tweens[i].easing_func._##suffix = ease_quint_in_##suffix; break; \
+	case EASE_QUINT_OUT: anim.tweens[i].easing_func._##suffix = ease_quint_out_##suffix; break; \
+	case EASE_QUINT_IN_OUT: anim.tweens[i].easing_func._##suffix = ease_quint_in_out_##suffix; break; \
+	case EASE_SIN_IN: anim.tweens[i].easing_func._##suffix = ease_sin_in_##suffix; break; \
+	case EASE_SIN_OUT: anim.tweens[i].easing_func._##suffix = ease_sin_out_##suffix; break; \
+	case EASE_SIN_IN_OUT: anim.tweens[i].easing_func._##suffix = ease_sin_in_out_##suffix; break; \
+	case EASE_EXP_IN: anim.tweens[i].easing_func._##suffix = ease_exp_in_##suffix; break; \
+	case EASE_EXP_OUT: anim.tweens[i].easing_func._##suffix = ease_exp_out_##suffix; break; \
+	case EASE_EXP_IN_OUT: anim.tweens[i].easing_func._##suffix = ease_exp_in_out_##suffix; break; \
+	case EASE_CIRC_IN: anim.tweens[i].easing_func._##suffix = ease_circ_in_##suffix; break; \
+	case EASE_CIRC_OUT: anim.tweens[i].easing_func._##suffix = ease_circ_out_##suffix; break; \
+	case EASE_CIRC_IN_OUT: anim.tweens[i].easing_func._##suffix = ease_circ_in_out_##suffix; break; \
+	default: anim.tweens[i].easing_func._##suffix = ease_linear_##suffix; break;
+
 	// The first item in the va list is a pointer to the value to be animated
 	switch (data_type) {
 		case ANIM_F64: {
@@ -417,77 +424,9 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 				easing_type = va_arg(v, int);
 
 				switch (easing_type) {
-					case EASE_LINEAR:
-						anim.tweens[i].easing_func._f64 = ease_linear_d;
-						break;
-					case EASE_QUAD_IN:
-						anim.tweens[i].easing_func._f64 = ease_quad_in_d;
-						break;
-					case EASE_QUAD_OUT:
-						anim.tweens[i].easing_func._f64 = ease_quad_out_d;
-						break;
-					case EASE_QUAD_IN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_quad_in_out_d;
-						break;
-					case EASE_CUBIC_IN:
-						anim.tweens[i].easing_func._f64 = ease_cubic_in_d;
-						break;
-					case EASE_CUBIC_OUT:
-						anim.tweens[i].easing_func._f64 = ease_cubic_out_d;
-						break;
-					case EASE_CUBIC_IN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_cubic_in_out_d;
-						break;
-					case EASE_QUART_IN:
-						anim.tweens[i].easing_func._f64 = ease_quart_in_d;
-						break;
-					case EASE_QUART_OUT:
-						anim.tweens[i].easing_func._f64 = ease_quart_out_d;
-						break;
-					case EASE_QUART_IN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_quart_in_out_d;
-						break;
-					case EASE_QUINT_IN:
-						anim.tweens[i].easing_func._f64 = ease_quint_in_d;
-						break;
-					case EASE_QUINT_OUT:
-						anim.tweens[i].easing_func._f64 = ease_quint_out_d;
-						break;
-					case EASE_QUINT_IN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_quint_in_out_d;
-						break;
-					case EASE_SIN_IN:
-						anim.tweens[i].easing_func._f64 = ease_sin_in_d;
-						break;
-					case EASE_SIN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_sin_out_d;
-						break;
-					case EASE_SIN_IN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_sin_in_out_d;
-						break;
-					case EASE_EXP_IN:
-						anim.tweens[i].easing_func._f64 = ease_exp_in_d;
-						break;
-					case EASE_EXP_OUT:
-						anim.tweens[i].easing_func._f64 = ease_exp_out_d;
-						break;
-					case EASE_EXP_IN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_exp_in_out_d;
-						break;
-					case EASE_CIRC_IN:
-						anim.tweens[i].easing_func._f64 = ease_circ_in_d;
-						break;
-					case EASE_CIRC_OUT:
-						anim.tweens[i].easing_func._f64 = ease_circ_out_d;
-						break;
-					case EASE_CIRC_IN_OUT:
-						anim.tweens[i].easing_func._f64 = ease_circ_in_out_d;
-						break;
+					preset_easing_func_cases(f64);
 					case EASE_CUSTOM:
 						anim.tweens[i].easing_func._f64 = va_arg(v, EasingFuncF64);
-						break;
-					default:
-						anim.tweens[i].easing_func._f64 = ease_linear_d;
 						break;
 				}
 			}
@@ -506,77 +445,9 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 				easing_type = va_arg(v, int);
 
 				switch (easing_type) {
-					case EASE_LINEAR:
-						anim.tweens[i].easing_func._f32 = ease_linear_f;
-						break;
-					case EASE_QUAD_IN:
-						anim.tweens[i].easing_func._f32 = ease_quad_in_f;
-						break;
-					case EASE_QUAD_OUT:
-						anim.tweens[i].easing_func._f32 = ease_quad_out_f;
-						break;
-					case EASE_QUAD_IN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_quad_in_out_f;
-						break;
-					case EASE_CUBIC_IN:
-						anim.tweens[i].easing_func._f32 = ease_cubic_in_f;
-						break;
-					case EASE_CUBIC_OUT:
-						anim.tweens[i].easing_func._f32 = ease_cubic_out_f;
-						break;
-					case EASE_CUBIC_IN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_cubic_in_out_f;
-						break;
-					case EASE_QUART_IN:
-						anim.tweens[i].easing_func._f32 = ease_quart_in_f;
-						break;
-					case EASE_QUART_OUT:
-						anim.tweens[i].easing_func._f32 = ease_quart_out_f;
-						break;
-					case EASE_QUART_IN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_quart_in_out_f;
-						break;
-					case EASE_QUINT_IN:
-						anim.tweens[i].easing_func._f32 = ease_quint_in_f;
-						break;
-					case EASE_QUINT_OUT:
-						anim.tweens[i].easing_func._f32 = ease_quint_out_f;
-						break;
-					case EASE_QUINT_IN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_quint_in_out_f;
-						break;
-					case EASE_SIN_IN:
-						anim.tweens[i].easing_func._f32 = ease_sin_in_f;
-						break;
-					case EASE_SIN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_sin_out_f;
-						break;
-					case EASE_SIN_IN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_sin_in_out_f;
-						break;
-					case EASE_EXP_IN:
-						anim.tweens[i].easing_func._f32 = ease_exp_in_f;
-						break;
-					case EASE_EXP_OUT:
-						anim.tweens[i].easing_func._f32 = ease_exp_out_f;
-						break;
-					case EASE_EXP_IN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_exp_in_out_f;
-						break;
-					case EASE_CIRC_IN:
-						anim.tweens[i].easing_func._f32 = ease_circ_in_f;
-						break;
-					case EASE_CIRC_OUT:
-						anim.tweens[i].easing_func._f32 = ease_circ_out_f;
-						break;
-					case EASE_CIRC_IN_OUT:
-						anim.tweens[i].easing_func._f32 = ease_circ_in_out_f;
-						break;
+					preset_easing_func_cases(f32);
 					case EASE_CUSTOM:
 						anim.tweens[i].easing_func._f32 = va_arg(v, EasingFuncF32);
-						break;
-					default:
-						anim.tweens[i].easing_func._f32 = ease_linear_f;
 						break;
 				}
 			}
@@ -595,77 +466,30 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 				easing_type = va_arg(v, int);
 
 				switch (easing_type) {
-					case EASE_LINEAR:
-						anim.tweens[i].easing_func._s32 = ease_linear_i;
-						break;
-					case EASE_QUAD_IN:
-						anim.tweens[i].easing_func._s32 = ease_quad_in_i;
-						break;
-					case EASE_QUAD_OUT:
-						anim.tweens[i].easing_func._s32 = ease_quad_out_i;
-						break;
-					case EASE_QUAD_IN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_quad_in_out_i;
-						break;
-					case EASE_CUBIC_IN:
-						anim.tweens[i].easing_func._s32 = ease_cubic_in_i;
-						break;
-					case EASE_CUBIC_OUT:
-						anim.tweens[i].easing_func._s32 = ease_cubic_out_i;
-						break;
-					case EASE_CUBIC_IN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_cubic_in_out_i;
-						break;
-					case EASE_QUART_IN:
-						anim.tweens[i].easing_func._s32 = ease_quart_in_i;
-						break;
-					case EASE_QUART_OUT:
-						anim.tweens[i].easing_func._s32 = ease_quart_out_i;
-						break;
-					case EASE_QUART_IN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_quart_in_out_i;
-						break;
-					case EASE_QUINT_IN:
-						anim.tweens[i].easing_func._s32 = ease_quint_in_i;
-						break;
-					case EASE_QUINT_OUT:
-						anim.tweens[i].easing_func._s32 = ease_quint_out_i;
-						break;
-					case EASE_QUINT_IN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_quint_in_out_i;
-						break;
-					case EASE_SIN_IN:
-						anim.tweens[i].easing_func._s32 = ease_sin_in_i;
-						break;
-					case EASE_SIN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_sin_out_i;
-						break;
-					case EASE_SIN_IN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_sin_in_out_i;
-						break;
-					case EASE_EXP_IN:
-						anim.tweens[i].easing_func._s32 = ease_exp_in_i;
-						break;
-					case EASE_EXP_OUT:
-						anim.tweens[i].easing_func._s32 = ease_exp_out_i;
-						break;
-					case EASE_EXP_IN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_exp_in_out_i;
-						break;
-					case EASE_CIRC_IN:
-						anim.tweens[i].easing_func._s32 = ease_circ_in_i;
-						break;
-					case EASE_CIRC_OUT:
-						anim.tweens[i].easing_func._s32 = ease_circ_out_i;
-						break;
-					case EASE_CIRC_IN_OUT:
-						anim.tweens[i].easing_func._s32 = ease_circ_in_out_i;
-						break;
+					preset_easing_func_cases(s32);
 					case EASE_CUSTOM:
 						anim.tweens[i].easing_func._s32 = va_arg(v, EasingFuncS32);
 						break;
-					default:
-						anim.tweens[i].easing_func._s32 = ease_linear_i;
+				}
+			}
+
+			break;
+		}
+
+		case ANIM_S64: {
+			anim.ptr._s64 = va_arg(v, long long*);
+
+			for (i = 0; i < tween_count; i++) {
+				int easing_type;
+				anim.tweens[i].duration = va_arg(v, double);
+				anim.tweens[i].start._s64 = va_arg(v, long long);
+				anim.tweens[i].end._s64 = va_arg(v, long long);
+				easing_type = va_arg(v, long long);
+
+				switch (easing_type) {
+					preset_easing_func_cases(s64);
+					case EASE_CUSTOM:
+						anim.tweens[i].easing_func._s64 = va_arg(v, EasingFuncS64);
 						break;
 				}
 			}

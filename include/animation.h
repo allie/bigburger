@@ -9,7 +9,8 @@
 enum AnimDataType {
   ANIM_F64,
   ANIM_F32,
-  ANIM_S32
+  ANIM_S32,
+  ANIM_S64
 };
 
 // Easing function types
@@ -43,6 +44,7 @@ enum EasingFuncType {
 typedef double (*EasingFuncF64)(double time, double duration, double start, double change);
 typedef float (*EasingFuncF32)(double time, double duration, float start, float change);
 typedef int (*EasingFuncS32)(double time, double duration, int start, int change);
+typedef long long (*EasingFuncS64)(double time, double duration, long long start, long long change);
 
 // Represents a keyframe and the necessary information about tweening to the next keyframe
 typedef struct {
@@ -52,16 +54,19 @@ typedef struct {
     double _f64;
     float _f32;
     int _s32;
+    long long _s64;
   } start;
   union {
     double _f64;
     float _f32;
     int _s32;
+    long long _s64;
   } end;
   union {
     EasingFuncF64 _f64;
     EasingFuncF32 _f32;
     EasingFuncS32 _s32;
+    EasingFuncS64 _s64;
   } easing_func;
 } Tween;
 
@@ -73,6 +78,7 @@ typedef struct {
     double* _f64;
     float* _f32;
     int* _s32;
+    long long* _s64;
   } ptr;
   unsigned int tween_count;
   Tween* tweens;

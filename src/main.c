@@ -2,6 +2,7 @@
 #include "common.h"
 #include "gamestate.h"
 #include "timer.h"
+#include "animation.h"
 
 char heap[1024 * 512 * 1];
 
@@ -20,6 +21,9 @@ static void vsync_callback(int pending) {
 
   // Update timer system, running any callbacks before the game state update
   timer_update(dt);
+
+  // Update animation system
+  animation_update(dt);
 
   nuContDataGetEx(controller, 0);
 
@@ -44,6 +48,9 @@ void mainproc(void* dummy) {
 
   // Initialize timer system
   timer_init();
+
+  // Initialize animation system
+  animation_init();
 
   // Initialize game state manager
   gamestate_init_manager();

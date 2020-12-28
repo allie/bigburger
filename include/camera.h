@@ -5,7 +5,7 @@
 #include "vector.h"
 #include "graphics.h"
 
-#define CAMERA_BASE_Y 400
+#define CAMERA_BASE_Y 400.0f
 
 typedef struct {
   float fov;

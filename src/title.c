@@ -4,7 +4,7 @@
 #include "title.h"
 #include "graphics.h"
 #include "camera.h"
-#include "easing.h"
+#include "animation.h"
 #include "object.h"
 #include "part.h"
 #include "colour.h"
@@ -18,7 +18,7 @@
 
 #define MIN_X -800
 #define MAX_X 800
-#define MAX_Y 800
+#define MAX_Y 800.0f
 
 #define BLINK_PERIOD 1
 
@@ -55,8 +55,8 @@ static double hue;
 static Hsv bg_hsv;
 static Rgb bg_rgb;
 
-static EasingF camera_y;
-static EasingF bun_drop;
+static int intro_anim = -1;
+static AnimationStatus intro_anim_status;
 
 static float heights[] = {
   40, // meat
@@ -121,6 +121,32 @@ void title_init() {
   // Randomize the stopping point for the first part
   stopping_point = get_stopping_point();
 
+  // Initialize and play the intro animation
+  intro_anim = animation_create(
+    0, 1, 4,
+    animate_value(
+      1, ANIM_FLOAT, &camera.pos.z,
+      2.0, 1000.0f, 600.0f, EASE_QUAD_OUT
+    ),
+    animate_value(
+      2, ANIM_FLOAT, &camera.pos.y,
+      1.0, 400.0f, 700.0f, EASE_SIN_IN,
+      1.0, 700.0f, 1000.0f, EASE_QUAD_OUT
+    ),
+    animate_value(
+      3, ANIM_FLOAT, &burger_rot,
+      0.8, 0.0f, -180.0f, EASE_QUAD_IN_OUT,
+      0.8, -180.0f, 180.0f, EASE_QUAD_IN_OUT,
+      0.4, 180.0f, 0.0f, EASE_CIRC_IN_OUT
+    ),
+    animate_value(
+      2, ANIM_FLOAT, &top_bun.pos.y,
+      1.5, 3000.0f, 3000.0f, EASE_LINEAR,
+      0.5, 3000.0f, 600.0f, EASE_QUINT_IN_OUT
+    )
+  );
+  animation_play(intro_anim);
+
   // Show the logo
   popup_init();
 }
@@ -161,10 +187,6 @@ static void update_current_part(double dt) {
     // Generate a new stopping point
     stopping_point = get_stopping_point();
 
-    // Ease the camera up to the correct Y
-    easing_init(camera_y, &camera.pos.y, 0.1, camera.pos.y, CAMERA_BASE_Y + current_y, easing_linear_f);
-    easing_play(camera_y);
-
     // Advance the bg colour wheel
     bg_hsv.h++;
     hue = bg_hsv.h;
@@ -196,6 +218,9 @@ void title_update(double dt) {
     }
   }
 
+  // Get intro animation status
+  intro_anim_status = animation_status(intro_anim);
+
   if (elapsed >= LOGO_START_TIME && !logo_shown) {
     popup_show(POPUP_TITLE, POPUP_TITLE_Y,  POPUP_TITLE_ANIM_DURATION, POPUP_VISIBLE_FOREVER);
     logo_shown = TRUE;
@@ -205,21 +230,8 @@ void title_update(double dt) {
     update_current_part(dt);
   }
 
-  if (camera_y.playing) {
-    easing_update(camera_y, dt);
-  }
-
-  if (bun_drop.playing) {
-    easing_update(bun_drop, dt);
-    if (!bun_drop.playing) {
-      bun_placed = TRUE;
-    }
-  }
-
-  if (part_count == MAX_PARTS && !bun_placed && !bun_drop.playing) {
-    easing_init(bun_drop, &top_bun.pos.y, BUN_DROP_DURATION, MAX_Y, current_y, easing_linear_f);
-    easing_play(bun_drop);
-    top_bun.pos.x = get_stopping_point();
+  if (part_count == MAX_PARTS && !bun_placed && !intro_anim_status.playing) {
+    bun_placed = TRUE;
   }
 
   if (part_count == MAX_PARTS) {
@@ -232,7 +244,7 @@ void title_update(double dt) {
   }
 
   if (bun_placed) {
-    burger_rot += STACK_SPIN_SPEED * dt;
+    burger_rot -= STACK_SPIN_SPEED * dt;
   }
 
   popup_update(dt);
@@ -302,10 +314,8 @@ void title_draw() {
     draw_part(&current_part);
   }
 
-  // Top bun, if placed
-  if (bun_placed || bun_drop.playing) {
-    graphics_draw_object(&top_bun, bun_Cube_mesh, FALSE);
-  }
+  // Top bun
+  graphics_draw_object(&top_bun, bun_Cube_mesh, FALSE);
 
   gSPPopMatrix(glistp++, G_MTX_MODELVIEW);
 
@@ -329,6 +339,6 @@ void title_draw() {
 }
 
 void title_destroy() {
-  camera_y.playing = FALSE;
+  animation_destroy_all();
   camera.pos.y = 0;
 }

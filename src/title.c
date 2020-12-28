@@ -58,6 +58,8 @@ static Rgb bg_rgb;
 static int intro_anim = -1;
 static AnimationStatus intro_anim_status;
 
+static int bg_colour_anim = -1;
+
 static float heights[] = {
   40, // meat
   20, // cheese
@@ -123,7 +125,7 @@ void title_init() {
 
   // Initialize and play the intro animation
   intro_anim = animation_create(
-    0, 1, 4,
+    0, TRUE, 4,
     animate_value(
       1, ANIM_FLOAT, &camera.pos.z,
       2.0, 1000.0f, 600.0f, EASE_QUAD_OUT
@@ -146,6 +148,16 @@ void title_init() {
     )
   );
   animation_play(intro_anim);
+
+  // Initialize and play the bg colour animation
+  bg_colour_anim = animation_create(
+    0, FALSE, 1,
+    animate_value(
+      1, ANIM_DOUBLE, &hue,
+      2.0, 255.0, 720.0, EASE_LINEAR
+    )
+  );
+  animation_play(bg_colour_anim);
 
   // Show the logo
   popup_init();
@@ -234,14 +246,8 @@ void title_update(double dt) {
     bun_placed = TRUE;
   }
 
-  if (part_count == MAX_PARTS) {
-    hue += dt * 10;
-    if (hue >= 255) {
-      hue -= 255;
-    };
-    bg_hsv.h = (u8)hue;
-    bg_rgb = hsv_to_rgb(bg_hsv);
-  }
+  bg_hsv.h = (u8)hue;
+  bg_rgb = hsv_to_rgb(bg_hsv);
 
   if (bun_placed) {
     burger_rot -= STACK_SPIN_SPEED * dt;

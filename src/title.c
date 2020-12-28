@@ -129,22 +129,22 @@ void title_init() {
   intro_anim = animation_create(
     0, TRUE, 4,
     animate_value(
-      1, ANIM_FLOAT, &camera.pos.z,
+      1, ANIM_F32, &camera.pos.z,
       2.0, 1000.0f, 600.0f, EASE_QUAD_OUT
     ),
     animate_value(
-      2, ANIM_FLOAT, &camera.pos.y,
+      2, ANIM_F32, &camera.pos.y,
       1.0, 400.0f, 700.0f, EASE_SIN_IN,
       1.0, 700.0f, 1000.0f, EASE_QUAD_OUT
     ),
     animate_value(
-      3, ANIM_FLOAT, &burger_rot,
+      3, ANIM_F32, &burger_rot,
       0.8, 0.0f, -180.0f, EASE_QUAD_IN_OUT,
       0.8, -180.0f, 180.0f, EASE_QUAD_IN_OUT,
       0.4, 180.0f, 0.0f, EASE_CIRC_IN_OUT
     ),
     animate_value(
-      2, ANIM_FLOAT, &top_bun.pos.y,
+      2, ANIM_F32, &top_bun.pos.y,
       1.5, 3000.0f, 3000.0f, EASE_LINEAR,
       0.5, 3000.0f, 600.0f, EASE_QUINT_IN_OUT
     )
@@ -155,7 +155,7 @@ void title_init() {
   bg_colour_anim = animation_create(
     0, TRUE, 1,
     animate_value(
-      1, ANIM_DOUBLE, &hue,
+      1, ANIM_F64, &hue,
       2.0, 255.0, 720.0, EASE_LINEAR
     )
   );
@@ -165,7 +165,7 @@ void title_init() {
   press_start_opa_anim = animation_create(
     -1, FALSE, 1,
     animate_value(
-      3, ANIM_DOUBLE, &press_start_opa,
+      3, ANIM_F64, &press_start_opa,
       0.4, 0.0, 255.0, EASE_QUAD_OUT,
       2.0, 255.0, 255.0, EASE_LINEAR,
       0.4, 255.0, 0.0, EASE_QUINT_IN

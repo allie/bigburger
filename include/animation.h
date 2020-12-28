@@ -3,11 +3,13 @@
 
 #define MAX_ANIMATIONS 100
 
+#include <ultra64.h>
+
 // Data types of values that can be animated
 enum AnimDataType {
-  ANIM_DOUBLE,
-  ANIM_FLOAT,
-  ANIM_INT
+  ANIM_F64,
+  ANIM_F32,
+  ANIM_S32
 };
 
 // Easing function types
@@ -38,28 +40,28 @@ enum EasingFuncType {
 };
 
 // Easing function pointer typedefs
-typedef double (*EasingFuncD)(double time, double duration, double start, double change);
-typedef float (*EasingFuncF)(double time, double duration, float start, float change);
-typedef int (*EasingFuncI)(double time, double duration, int start, int change);
+typedef double (*EasingFuncF64)(double time, double duration, double start, double change);
+typedef float (*EasingFuncF32)(double time, double duration, float start, float change);
+typedef int (*EasingFuncS32)(double time, double duration, int start, int change);
 
 // Represents a keyframe and the necessary information about tweening to the next keyframe
 typedef struct {
   double start_time;
   double duration;
   union {
-    double d;
-    float f;
-    int i;
+    double _f64;
+    float _f32;
+    int _s32;
   } start;
   union {
-    double d;
-    float f;
-    int i;
+    double _f64;
+    float _f32;
+    int _s32;
   } end;
   union {
-    EasingFuncD d;
-    EasingFuncF f;
-    EasingFuncI i;
+    EasingFuncF64 _f64;
+    EasingFuncF32 _f32;
+    EasingFuncS32 _s32;
   } easing_func;
 } Tween;
 
@@ -68,9 +70,9 @@ typedef struct {
   int data_type;
   unsigned int current_tween;
   union {
-    double* d;
-    float* f;
-    int* i;
+    double* _f64;
+    float* _f32;
+    int* _s32;
   } ptr;
   unsigned int tween_count;
   Tween* tweens;
@@ -127,7 +129,7 @@ easing_func_ptr:  This argument should be omitted unless using EASE_CUSTOM, in w
 Example:
 
 animate_value(
-  2, ANIM_DOUBLE, &x,
+  2, ANIM_F64, &x,
   0.5, 0.0, 100.0, EASE_QUAD_IN_OUT,
   0.5, 100.0, 0.0, EASE_QUAD_IN_OUT
 );
@@ -155,12 +157,12 @@ Example:
 int anim = animation_create(
   0, 1, 2,
   animate_value(
-    2, ANIM_DOUBLE, &x,
+    2, ANIM_F64, &x,
     0.5, 0.0, 100.0, EASE_QUAD_IN_OUT,
     0.5, 100.0, 0.0, EASE_QUAD_IN_OUT
   ),
   animate_value(
-    2, ANIM_DOUBLE, &y,
+    2, ANIM_F64, &y,
     0.5, 100.0, 0.0, EASE_QUAD_IN_OUT,
     0.5, 0.0, 100.0, EASE_QUAD_IN_OUT
   )

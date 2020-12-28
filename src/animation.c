@@ -299,16 +299,16 @@ void animation_update(double dt) {
 
 			if (elapsed >= current_tween->duration) {
 				switch (value->data_type) {
-					case ANIM_DOUBLE:
-						*(value->ptr.d) = current_tween->end.d;
+					case ANIM_F64:
+						*(value->ptr._f64) = current_tween->end._f64;
 						break;
 
-					case ANIM_FLOAT:
-						*(value->ptr.f) = current_tween->end.f;
+					case ANIM_F32:
+						*(value->ptr._f32) = current_tween->end._f32;
 						break;
 
-					case ANIM_INT:
-						*(value->ptr.i) = current_tween->end.i;
+					case ANIM_S32:
+						*(value->ptr._s32) = current_tween->end._s32;
 						break;
 
 					default:
@@ -321,32 +321,32 @@ void animation_update(double dt) {
 			progress = progress > 1.0 ? 1.0 : progress;
 
 			switch (value->data_type) {
-				case ANIM_DOUBLE: {
-					*(value->ptr.d) = current_tween->easing_func.d(
+				case ANIM_F64: {
+					*(value->ptr._f64) = current_tween->easing_func._f64(
 						anim->status.elapsed - current_tween->start_time,
 						current_tween->duration,
-						current_tween->start.d,
-						current_tween->end.d - current_tween->start.d
+						current_tween->start._f64,
+						current_tween->end._f64 - current_tween->start._f64
 					);
 					break;
 				}
 
-				case ANIM_FLOAT: {
-					*(value->ptr.f) = current_tween->easing_func.f(
+				case ANIM_F32: {
+					*(value->ptr._f32) = current_tween->easing_func._f32(
 						anim->status.elapsed - current_tween->start_time,
 						current_tween->duration,
-						current_tween->start.f,
-						current_tween->end.f - current_tween->start.f
+						current_tween->start._f32,
+						current_tween->end._f32 - current_tween->start._f32
 					);
 					break;
 				}
 
-				case ANIM_INT: {
-					*(value->ptr.i) = current_tween->easing_func.i(
+				case ANIM_S32: {
+					*(value->ptr._s32) = current_tween->easing_func._s32(
 						anim->status.elapsed - current_tween->start_time,
 						current_tween->duration,
-						current_tween->start.i,
-						current_tween->end.i - current_tween->start.i
+						current_tween->start._s32,
+						current_tween->end._s32 - current_tween->start._s32
 					);
 					break;
 				}
@@ -363,16 +363,16 @@ void animation_update(double dt) {
 				AnimatedValue* value = &(anim->values[v]);
 
 				switch (value->data_type) {
-					case ANIM_DOUBLE:
-						*(value->ptr.d) = value->tweens[value->tween_count - 1].end.d;
+					case ANIM_F64:
+						*(value->ptr._f64) = value->tweens[value->tween_count - 1].end._f64;
 						break;
 
-					case ANIM_FLOAT:
-						*(value->ptr.f) = value->tweens[value->tween_count - 1].end.f;
+					case ANIM_F32:
+						*(value->ptr._f32) = value->tweens[value->tween_count - 1].end._f32;
 						break;
 
-					case ANIM_INT:
-						*(value->ptr.i) = value->tweens[value->tween_count - 1].end.i;
+					case ANIM_S32:
+						*(value->ptr._s32) = value->tweens[value->tween_count - 1].end._s32;
 						break;
 
 					default:
@@ -395,7 +395,7 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 	va_list v;
 	AnimatedValue anim;
 	
-	assert(data_type == ANIM_DOUBLE || data_type == ANIM_FLOAT || data_type == ANIM_INT);
+	assert(data_type == ANIM_F64 || data_type == ANIM_F32 || data_type == ANIM_S32);
 
 	anim.data_type = data_type;
 	anim.tween_count = tween_count;
@@ -406,88 +406,88 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 
 	// The first item in the va list is a pointer to the value to be animated
 	switch (data_type) {
-		case ANIM_DOUBLE: {
-			anim.ptr.d = va_arg(v, double*);
+		case ANIM_F64: {
+			anim.ptr._f64 = va_arg(v, double*);
 
 			for (i = 0; i < tween_count; i++) {
 				int easing_type;
 				anim.tweens[i].duration = va_arg(v, double);
-				anim.tweens[i].start.d = va_arg(v, double);
-				anim.tweens[i].end.d = va_arg(v, double);
+				anim.tweens[i].start._f64 = va_arg(v, double);
+				anim.tweens[i].end._f64 = va_arg(v, double);
 				easing_type = va_arg(v, int);
 
 				switch (easing_type) {
 					case EASE_LINEAR:
-						anim.tweens[i].easing_func.d = ease_linear_d;
+						anim.tweens[i].easing_func._f64 = ease_linear_d;
 						break;
 					case EASE_QUAD_IN:
-						anim.tweens[i].easing_func.d = ease_quad_in_d;
+						anim.tweens[i].easing_func._f64 = ease_quad_in_d;
 						break;
 					case EASE_QUAD_OUT:
-						anim.tweens[i].easing_func.d = ease_quad_out_d;
+						anim.tweens[i].easing_func._f64 = ease_quad_out_d;
 						break;
 					case EASE_QUAD_IN_OUT:
-						anim.tweens[i].easing_func.d = ease_quad_in_out_d;
+						anim.tweens[i].easing_func._f64 = ease_quad_in_out_d;
 						break;
 					case EASE_CUBIC_IN:
-						anim.tweens[i].easing_func.d = ease_cubic_in_d;
+						anim.tweens[i].easing_func._f64 = ease_cubic_in_d;
 						break;
 					case EASE_CUBIC_OUT:
-						anim.tweens[i].easing_func.d = ease_cubic_out_d;
+						anim.tweens[i].easing_func._f64 = ease_cubic_out_d;
 						break;
 					case EASE_CUBIC_IN_OUT:
-						anim.tweens[i].easing_func.d = ease_cubic_in_out_d;
+						anim.tweens[i].easing_func._f64 = ease_cubic_in_out_d;
 						break;
 					case EASE_QUART_IN:
-						anim.tweens[i].easing_func.d = ease_quart_in_d;
+						anim.tweens[i].easing_func._f64 = ease_quart_in_d;
 						break;
 					case EASE_QUART_OUT:
-						anim.tweens[i].easing_func.d = ease_quart_out_d;
+						anim.tweens[i].easing_func._f64 = ease_quart_out_d;
 						break;
 					case EASE_QUART_IN_OUT:
-						anim.tweens[i].easing_func.d = ease_quart_in_out_d;
+						anim.tweens[i].easing_func._f64 = ease_quart_in_out_d;
 						break;
 					case EASE_QUINT_IN:
-						anim.tweens[i].easing_func.d = ease_quint_in_d;
+						anim.tweens[i].easing_func._f64 = ease_quint_in_d;
 						break;
 					case EASE_QUINT_OUT:
-						anim.tweens[i].easing_func.d = ease_quint_out_d;
+						anim.tweens[i].easing_func._f64 = ease_quint_out_d;
 						break;
 					case EASE_QUINT_IN_OUT:
-						anim.tweens[i].easing_func.d = ease_quint_in_out_d;
+						anim.tweens[i].easing_func._f64 = ease_quint_in_out_d;
 						break;
 					case EASE_SIN_IN:
-						anim.tweens[i].easing_func.d = ease_sin_in_d;
+						anim.tweens[i].easing_func._f64 = ease_sin_in_d;
 						break;
 					case EASE_SIN_OUT:
-						anim.tweens[i].easing_func.d = ease_sin_out_d;
+						anim.tweens[i].easing_func._f64 = ease_sin_out_d;
 						break;
 					case EASE_SIN_IN_OUT:
-						anim.tweens[i].easing_func.d = ease_sin_in_out_d;
+						anim.tweens[i].easing_func._f64 = ease_sin_in_out_d;
 						break;
 					case EASE_EXP_IN:
-						anim.tweens[i].easing_func.d = ease_exp_in_d;
+						anim.tweens[i].easing_func._f64 = ease_exp_in_d;
 						break;
 					case EASE_EXP_OUT:
-						anim.tweens[i].easing_func.d = ease_exp_out_d;
+						anim.tweens[i].easing_func._f64 = ease_exp_out_d;
 						break;
 					case EASE_EXP_IN_OUT:
-						anim.tweens[i].easing_func.d = ease_exp_in_out_d;
+						anim.tweens[i].easing_func._f64 = ease_exp_in_out_d;
 						break;
 					case EASE_CIRC_IN:
-						anim.tweens[i].easing_func.d = ease_circ_in_d;
+						anim.tweens[i].easing_func._f64 = ease_circ_in_d;
 						break;
 					case EASE_CIRC_OUT:
-						anim.tweens[i].easing_func.d = ease_circ_out_d;
+						anim.tweens[i].easing_func._f64 = ease_circ_out_d;
 						break;
 					case EASE_CIRC_IN_OUT:
-						anim.tweens[i].easing_func.d = ease_circ_in_out_d;
+						anim.tweens[i].easing_func._f64 = ease_circ_in_out_d;
 						break;
 					case EASE_CUSTOM:
-						anim.tweens[i].easing_func.d = va_arg(v, EasingFuncD);
+						anim.tweens[i].easing_func._f64 = va_arg(v, EasingFuncF64);
 						break;
 					default:
-						anim.tweens[i].easing_func.d = ease_linear_d;
+						anim.tweens[i].easing_func._f64 = ease_linear_d;
 						break;
 				}
 			}
@@ -495,88 +495,88 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 			break;
 		}
 
-		case ANIM_FLOAT: {
-			anim.ptr.f = va_arg(v, float*);
+		case ANIM_F32: {
+			anim.ptr._f32 = va_arg(v, float*);
 
 			for (i = 0; i < tween_count; i++) {
 				int easing_type;
 				anim.tweens[i].duration = va_arg(v, double);
-				anim.tweens[i].start.f = va_arg(v, double);
-				anim.tweens[i].end.f = va_arg(v, double);
+				anim.tweens[i].start._f32 = va_arg(v, double);
+				anim.tweens[i].end._f32 = va_arg(v, double);
 				easing_type = va_arg(v, int);
 
 				switch (easing_type) {
 					case EASE_LINEAR:
-						anim.tweens[i].easing_func.f = ease_linear_f;
+						anim.tweens[i].easing_func._f32 = ease_linear_f;
 						break;
 					case EASE_QUAD_IN:
-						anim.tweens[i].easing_func.f = ease_quad_in_f;
+						anim.tweens[i].easing_func._f32 = ease_quad_in_f;
 						break;
 					case EASE_QUAD_OUT:
-						anim.tweens[i].easing_func.f = ease_quad_out_f;
+						anim.tweens[i].easing_func._f32 = ease_quad_out_f;
 						break;
 					case EASE_QUAD_IN_OUT:
-						anim.tweens[i].easing_func.f = ease_quad_in_out_f;
+						anim.tweens[i].easing_func._f32 = ease_quad_in_out_f;
 						break;
 					case EASE_CUBIC_IN:
-						anim.tweens[i].easing_func.f = ease_cubic_in_f;
+						anim.tweens[i].easing_func._f32 = ease_cubic_in_f;
 						break;
 					case EASE_CUBIC_OUT:
-						anim.tweens[i].easing_func.f = ease_cubic_out_f;
+						anim.tweens[i].easing_func._f32 = ease_cubic_out_f;
 						break;
 					case EASE_CUBIC_IN_OUT:
-						anim.tweens[i].easing_func.f = ease_cubic_in_out_f;
+						anim.tweens[i].easing_func._f32 = ease_cubic_in_out_f;
 						break;
 					case EASE_QUART_IN:
-						anim.tweens[i].easing_func.f = ease_quart_in_f;
+						anim.tweens[i].easing_func._f32 = ease_quart_in_f;
 						break;
 					case EASE_QUART_OUT:
-						anim.tweens[i].easing_func.f = ease_quart_out_f;
+						anim.tweens[i].easing_func._f32 = ease_quart_out_f;
 						break;
 					case EASE_QUART_IN_OUT:
-						anim.tweens[i].easing_func.f = ease_quart_in_out_f;
+						anim.tweens[i].easing_func._f32 = ease_quart_in_out_f;
 						break;
 					case EASE_QUINT_IN:
-						anim.tweens[i].easing_func.f = ease_quint_in_f;
+						anim.tweens[i].easing_func._f32 = ease_quint_in_f;
 						break;
 					case EASE_QUINT_OUT:
-						anim.tweens[i].easing_func.f = ease_quint_out_f;
+						anim.tweens[i].easing_func._f32 = ease_quint_out_f;
 						break;
 					case EASE_QUINT_IN_OUT:
-						anim.tweens[i].easing_func.f = ease_quint_in_out_f;
+						anim.tweens[i].easing_func._f32 = ease_quint_in_out_f;
 						break;
 					case EASE_SIN_IN:
-						anim.tweens[i].easing_func.f = ease_sin_in_f;
+						anim.tweens[i].easing_func._f32 = ease_sin_in_f;
 						break;
 					case EASE_SIN_OUT:
-						anim.tweens[i].easing_func.f = ease_sin_out_f;
+						anim.tweens[i].easing_func._f32 = ease_sin_out_f;
 						break;
 					case EASE_SIN_IN_OUT:
-						anim.tweens[i].easing_func.f = ease_sin_in_out_f;
+						anim.tweens[i].easing_func._f32 = ease_sin_in_out_f;
 						break;
 					case EASE_EXP_IN:
-						anim.tweens[i].easing_func.f = ease_exp_in_f;
+						anim.tweens[i].easing_func._f32 = ease_exp_in_f;
 						break;
 					case EASE_EXP_OUT:
-						anim.tweens[i].easing_func.f = ease_exp_out_f;
+						anim.tweens[i].easing_func._f32 = ease_exp_out_f;
 						break;
 					case EASE_EXP_IN_OUT:
-						anim.tweens[i].easing_func.f = ease_exp_in_out_f;
+						anim.tweens[i].easing_func._f32 = ease_exp_in_out_f;
 						break;
 					case EASE_CIRC_IN:
-						anim.tweens[i].easing_func.f = ease_circ_in_f;
+						anim.tweens[i].easing_func._f32 = ease_circ_in_f;
 						break;
 					case EASE_CIRC_OUT:
-						anim.tweens[i].easing_func.f = ease_circ_out_f;
+						anim.tweens[i].easing_func._f32 = ease_circ_out_f;
 						break;
 					case EASE_CIRC_IN_OUT:
-						anim.tweens[i].easing_func.f = ease_circ_in_out_f;
+						anim.tweens[i].easing_func._f32 = ease_circ_in_out_f;
 						break;
 					case EASE_CUSTOM:
-						anim.tweens[i].easing_func.f = va_arg(v, EasingFuncF);
+						anim.tweens[i].easing_func._f32 = va_arg(v, EasingFuncF32);
 						break;
 					default:
-						anim.tweens[i].easing_func.f = ease_linear_f;
+						anim.tweens[i].easing_func._f32 = ease_linear_f;
 						break;
 				}
 			}
@@ -584,88 +584,88 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 			break;
 		}
 
-		case ANIM_INT: {
-			anim.ptr.i = va_arg(v, int*);
+		case ANIM_S32: {
+			anim.ptr._s32 = va_arg(v, int*);
 
 			for (i = 0; i < tween_count; i++) {
 				int easing_type;
 				anim.tweens[i].duration = va_arg(v, double);
-				anim.tweens[i].start.i = va_arg(v, int);
-				anim.tweens[i].end.i = va_arg(v, int);
+				anim.tweens[i].start._s32 = va_arg(v, int);
+				anim.tweens[i].end._s32 = va_arg(v, int);
 				easing_type = va_arg(v, int);
 
 				switch (easing_type) {
 					case EASE_LINEAR:
-						anim.tweens[i].easing_func.i = ease_linear_i;
+						anim.tweens[i].easing_func._s32 = ease_linear_i;
 						break;
 					case EASE_QUAD_IN:
-						anim.tweens[i].easing_func.i = ease_quad_in_i;
+						anim.tweens[i].easing_func._s32 = ease_quad_in_i;
 						break;
 					case EASE_QUAD_OUT:
-						anim.tweens[i].easing_func.i = ease_quad_out_i;
+						anim.tweens[i].easing_func._s32 = ease_quad_out_i;
 						break;
 					case EASE_QUAD_IN_OUT:
-						anim.tweens[i].easing_func.i = ease_quad_in_out_i;
+						anim.tweens[i].easing_func._s32 = ease_quad_in_out_i;
 						break;
 					case EASE_CUBIC_IN:
-						anim.tweens[i].easing_func.i = ease_cubic_in_i;
+						anim.tweens[i].easing_func._s32 = ease_cubic_in_i;
 						break;
 					case EASE_CUBIC_OUT:
-						anim.tweens[i].easing_func.i = ease_cubic_out_i;
+						anim.tweens[i].easing_func._s32 = ease_cubic_out_i;
 						break;
 					case EASE_CUBIC_IN_OUT:
-						anim.tweens[i].easing_func.i = ease_cubic_in_out_i;
+						anim.tweens[i].easing_func._s32 = ease_cubic_in_out_i;
 						break;
 					case EASE_QUART_IN:
-						anim.tweens[i].easing_func.i = ease_quart_in_i;
+						anim.tweens[i].easing_func._s32 = ease_quart_in_i;
 						break;
 					case EASE_QUART_OUT:
-						anim.tweens[i].easing_func.i = ease_quart_out_i;
+						anim.tweens[i].easing_func._s32 = ease_quart_out_i;
 						break;
 					case EASE_QUART_IN_OUT:
-						anim.tweens[i].easing_func.i = ease_quart_in_out_i;
+						anim.tweens[i].easing_func._s32 = ease_quart_in_out_i;
 						break;
 					case EASE_QUINT_IN:
-						anim.tweens[i].easing_func.i = ease_quint_in_i;
+						anim.tweens[i].easing_func._s32 = ease_quint_in_i;
 						break;
 					case EASE_QUINT_OUT:
-						anim.tweens[i].easing_func.i = ease_quint_out_i;
+						anim.tweens[i].easing_func._s32 = ease_quint_out_i;
 						break;
 					case EASE_QUINT_IN_OUT:
-						anim.tweens[i].easing_func.i = ease_quint_in_out_i;
+						anim.tweens[i].easing_func._s32 = ease_quint_in_out_i;
 						break;
 					case EASE_SIN_IN:
-						anim.tweens[i].easing_func.i = ease_sin_in_i;
+						anim.tweens[i].easing_func._s32 = ease_sin_in_i;
 						break;
 					case EASE_SIN_OUT:
-						anim.tweens[i].easing_func.i = ease_sin_out_i;
+						anim.tweens[i].easing_func._s32 = ease_sin_out_i;
 						break;
 					case EASE_SIN_IN_OUT:
-						anim.tweens[i].easing_func.i = ease_sin_in_out_i;
+						anim.tweens[i].easing_func._s32 = ease_sin_in_out_i;
 						break;
 					case EASE_EXP_IN:
-						anim.tweens[i].easing_func.i = ease_exp_in_i;
+						anim.tweens[i].easing_func._s32 = ease_exp_in_i;
 						break;
 					case EASE_EXP_OUT:
-						anim.tweens[i].easing_func.i = ease_exp_out_i;
+						anim.tweens[i].easing_func._s32 = ease_exp_out_i;
 						break;
 					case EASE_EXP_IN_OUT:
-						anim.tweens[i].easing_func.i = ease_exp_in_out_i;
+						anim.tweens[i].easing_func._s32 = ease_exp_in_out_i;
 						break;
 					case EASE_CIRC_IN:
-						anim.tweens[i].easing_func.i = ease_circ_in_i;
+						anim.tweens[i].easing_func._s32 = ease_circ_in_i;
 						break;
 					case EASE_CIRC_OUT:
-						anim.tweens[i].easing_func.i = ease_circ_out_i;
+						anim.tweens[i].easing_func._s32 = ease_circ_out_i;
 						break;
 					case EASE_CIRC_IN_OUT:
-						anim.tweens[i].easing_func.i = ease_circ_in_out_i;
+						anim.tweens[i].easing_func._s32 = ease_circ_in_out_i;
 						break;
 					case EASE_CUSTOM:
-						anim.tweens[i].easing_func.i = va_arg(v, EasingFuncI);
+						anim.tweens[i].easing_func._s32 = va_arg(v, EasingFuncS32);
 						break;
 					default:
-						anim.tweens[i].easing_func.i = ease_linear_i;
+						anim.tweens[i].easing_func._s32 = ease_linear_i;
 						break;
 				}
 			}

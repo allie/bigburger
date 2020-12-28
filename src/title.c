@@ -27,7 +27,7 @@
 #define STACK_SPIN_SPEED 20
 
 #define LOGO_START_TIME 2.0
-#define START_BLINKING_TIME 1.5
+#define START_BLINKING_TIME 2.0
 
 #define BUN_DROP_DURATION 0.1
 
@@ -45,6 +45,7 @@ static bool bun_placed = FALSE;
 static u32 part_count = 0;
 static double elapsed = 0;
 static double blink_timer = 0;
+static double press_start_opa = 0.0;
 static int stopping_point;
 static float current_y = 0;
 
@@ -59,6 +60,7 @@ static int intro_anim = -1;
 static AnimationStatus intro_anim_status;
 
 static int bg_colour_anim = -1;
+static int press_start_opa_anim = -1;
 
 static float heights[] = {
   40, // meat
@@ -73,7 +75,7 @@ static void draw_hud() {
     popup_draw();
   }
 
-  img_set_colour(255, 255, 255, 255);
+  img_set_colour(255, 255, 255, (u8)press_start_opa);
 
   if (press_start_shown) {
     img_draw(press_start_img, SCREEN_W / 2 - press_start_img.width / 2, 190);
@@ -151,13 +153,24 @@ void title_init() {
 
   // Initialize and play the bg colour animation
   bg_colour_anim = animation_create(
-    0, FALSE, 1,
+    0, TRUE, 1,
     animate_value(
       1, ANIM_DOUBLE, &hue,
       2.0, 255.0, 720.0, EASE_LINEAR
     )
   );
   animation_play(bg_colour_anim);
+
+  // Initialize the press start opacity animation
+  press_start_opa_anim = animation_create(
+    -1, FALSE, 1,
+    animate_value(
+      3, ANIM_DOUBLE, &press_start_opa,
+      0.4, 0.0, 255.0, EASE_QUAD_OUT,
+      2.0, 255.0, 255.0, EASE_LINEAR,
+      0.4, 255.0, 0.0, EASE_QUINT_IN
+    )
+  );
 
   // Show the logo
   popup_init();
@@ -216,18 +229,9 @@ void title_update(double dt) {
 
   elapsed += dt;
 
-  if (elapsed >= START_BLINKING_TIME) {
-    if (press_start_shown) {
-      blink_timer -= dt;
-      if (blink_timer <= 0) {
-        press_start_shown = FALSE;
-      }
-    } else {
-      blink_timer += dt;
-      if (blink_timer >= BLINK_PERIOD) {
-        press_start_shown = TRUE;
-      }
-    }
+  if (elapsed >= START_BLINKING_TIME && !press_start_shown) {
+    press_start_shown = TRUE;
+    animation_play(press_start_opa_anim);
   }
 
   // Get intro animation status

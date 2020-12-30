@@ -261,26 +261,6 @@ void animation_update(double dt) {
 			elapsed = anim->status.elapsed - current_tween->start_time;
 
 			if (elapsed >= current_tween->duration) {
-				switch (value->data_type) {
-					case ANIM_F64:
-						*(value->ptr._f64) = current_tween->end._f64;
-						break;
-
-					case ANIM_F32:
-						*(value->ptr._f32) = current_tween->end._f32;
-						break;
-
-					case ANIM_S32:
-						*(value->ptr._s32) = current_tween->end._s32;
-						break;
-
-					case ANIM_S64:
-						*(value->ptr._s64) = current_tween->end._s64;
-						break;
-
-					default:
-						break;
-				}
 				continue;
 			}
 
@@ -375,8 +355,6 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 	double elapsed = 0;
 	va_list v;
 	AnimatedValue anim;
-	
-	assert(data_type == ANIM_F64 || data_type == ANIM_F32 || data_type == ANIM_S32);
 
 	anim.data_type = data_type;
 	anim.tween_count = tween_count;
@@ -484,7 +462,7 @@ AnimatedValue animate_value(unsigned int tween_count, int data_type, ...) {
 				anim.tweens[i].duration = va_arg(v, double);
 				anim.tweens[i].start._s64 = va_arg(v, long long);
 				anim.tweens[i].end._s64 = va_arg(v, long long);
-				easing_type = va_arg(v, long long);
+				easing_type = va_arg(v, int);
 
 				switch (easing_type) {
 					preset_easing_func_cases(s64);

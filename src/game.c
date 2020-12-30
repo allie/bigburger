@@ -5,6 +5,7 @@
 #include "graphics.h"
 #include "camera.h"
 #include "easing.h"
+#include "animation.h"
 #include "object.h"
 #include "part.h"
 #include "colour.h"
@@ -63,7 +64,8 @@ static Part current_part;
 Part parts[MAX_PARTS];
 static Part part_queue[PART_QUEUE_LENGTH];
 
-u64 score = 0;
+s64 score = 0;
+s64 score_disp = 0;
 static u32 lives = STARTING_LIVES;
 u32 part_count = 0;
 static u32 current_y = 0;
@@ -116,7 +118,7 @@ static void draw_hud() {
   // "SCORE" text
   img_draw(score_img, SAFE_AREA_H, SAFE_AREA_V);
   // Score value
-  number_draw_0_padded(score, 1, SAFE_AREA_H, 31);
+  number_draw_0_padded(score_disp, 1, SAFE_AREA_H, 31);
 
   // "LEVEL" text
   img_draw(level_img, SAFE_AREA_H, 58);
@@ -311,6 +313,8 @@ static f32 calc_centre_of_mass() {
 }
 
 static void place_current_part() {
+  s64 new_score = score;
+
   float dist = part_count > 0 ?
     fabs(current_part.obj.pos.x - parts[part_count - 1].obj.pos.x) :
     fabs(current_part.obj.pos.x);
@@ -356,7 +360,7 @@ static void place_current_part() {
   // If this was a sweet spot hit, popup great
   if (in_sweet_spot) {
     popup_show(POPUP_GREAT, POPUP_JUDGE_Y, POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
-    score += SCORE_GREAT;
+    new_score += SCORE_GREAT;
   } else {
     // Check for a miss
     if (dist >= max_safe_dist) {
@@ -370,13 +374,27 @@ static void place_current_part() {
     } else {
       // Just good.
       popup_show(POPUP_GOOD, POPUP_JUDGE_Y,  POPUP_JUDGE_ANIM_DURATION, POPUP_JUDGE_VISIBLE_DURATION);
-      score += SCORE_GOOD;
+      new_score += SCORE_GOOD;
     }
   }
 
   // Add some extra points for keeping the stack near the centre of the screen
   if (dist < max_safe_dist) {
-    score += (((MAX_X / 2) - dist_from_centre) / (MAX_X / 2)) * SCORE_CENTRE_BONUS;
+    new_score += (((MAX_X / 2) - dist_from_centre) / (MAX_X / 2)) * SCORE_CENTRE_BONUS;
+  }
+
+  // Animate the displayed score value to the new score
+  if (new_score != score) {
+    score = new_score;
+    animation_play(
+      animation_create(
+        0, TRUE, 1,
+        animate_value(
+          1, ANIM_S64, &score_disp,
+          0.2, score_disp, new_score, EASE_LINEAR
+        )
+      )
+    );
   }
 }
 
